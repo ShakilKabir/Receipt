@@ -1,0 +1,200 @@
+
+
+/* 
+    1. Need to work with font size
+    8.5=11.33, 15=20, 10=13.33, 10.5=14, 
+    2. Font family 
+*/
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Courier Prime", monospace;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: -1px;
+}
+
+body {
+  background-color: #ddd;
+}
+
+.address_name,
+.date_time_status,
+.products,
+.calculation {
+  font-size: 11.33px;
+}
+.subtotal, .sales_tax, .total, .cash, .charge_due {
+  display: flex;
+  width: 140px;
+  justify-content: space-between;
+}
+
+.container {
+  margin: 0 auto;
+  width: 300px;
+  padding: 0 30px;
+  background-color: white;
+}
+
+.logo_container {
+  padding-top: 50px;
+}
+.logo_container .logo {
+  width: 236px;
+  height: 84.5px;
+  display: block;
+  margin: 0 auto 32px;
+}
+
+.address_name {
+  margin-bottom: 16px;
+  font-family: "Courier Prime", monospace;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.address_name .name_code {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 8px;
+}
+
+.date_time_status {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+}
+.date_time_status .date_time {
+  display: flex;
+  gap: 8px;
+}
+
+.products {
+  margin-bottom: 12px;
+}
+.products .product {
+  display: flex;
+  gap: 4px;
+  align-items: end;
+  justify-content: space-between;
+}
+.products .product .product_name {
+  margin: 0;
+  position: relative;
+
+}
+.products .product .product_name .text-content {
+  display: inline-block;
+  text-indent: -16px;
+  padding-left: 16px; 
+}
+
+.calculation {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+}
+.calculation .charge_due {
+  padding-left: 16px;
+}
+
+.barcode {
+margin: 32px 0 16px;
+}
+.barcode .barcode_time_date {
+  display: flex;
+  justify-content: space-between;
+  font-size: 20px;
+  margin-bottom: -8px;
+  position: relative;
+  z-index: 9;
+}
+.barcode svg {
+  width: 88%;
+  height: 100%;
+  display: block;
+  margin: 0 auto;
+}
+.barcode .barcode_lower {
+  font-size: 12.33px;
+  text-align: center;
+  /* line-height: 6px; */
+  /* line-height: 85%; */
+  margin-top: -7px;
+  position: relative;
+}
+
+.return_policy {
+  font-size: 11.33px;
+}
+.return_policy .title {
+  text-align: center;
+}
+.return_policy .expire {
+  /* padding-left: 8px; */
+  padding-right: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+}
+.return_policy .expire .center {
+  display: flex;
+  justify-content: center;
+}
+
+.star {
+  font-size: 11.33px;
+  text-align: center;
+  margin-top: 16px
+}
+.did_we_nail_it {
+  font-size: 14px;
+  text-align: center;
+}
+
+.footer {
+  text-align: center;
+  font-size: 11.33px;
+  padding-bottom: 50px;
+}
+.footer .middle, .link {
+  margin: 8px 0 16px;
+}
+
+/* input field css start from here  */
+.input_container {
+  margin: 0 auto;
+  width: 375px;
+  padding: 0 20px;
+  background-color: white;
+}
+
+.input_container input {
+  width: 100%;
+  height: 35px;
+  padding-left: 5px;
+  border-radius: 3px;
+}
+.input_container .name_code {
+  padding: 0;
+  margin-top: 5px;
+  gap: 4px;
+  align-items: end;
+}
+.input_container .name_code .name input {
+  width: 97px;
+}
+.input_container .products .product {
+  align-items: unset;
+}
+
+.input_container .subtotal, .input_container .sales_tax, .input_container .total, .input_container .cash, .input_container .charge_due {
+  display: flex;
+  width: 255px;
+  justify-content: space-between;
+  align-items: center;
+}

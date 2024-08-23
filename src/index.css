@@ -119,13 +119,13 @@ margin: 32px 0 16px;
   display: flex;
   justify-content: space-between;
   font-size: 20px;
-  margin-bottom: -10px;
+  margin-bottom: -7px;
   position: relative;
   z-index: 9;
 }
 .barcode svg {
   width: 88%;
-  height: 75px;
+  height: 55px;
   display: block;
   margin: 0 auto;
 }
@@ -134,7 +134,7 @@ margin: 32px 0 16px;
   text-align: center;
   /* line-height: 6px; */
   /* line-height: 85%; */
-  margin-top: -9px;
+  margin-top: -7px;
   position: relative;
 }
 
@@ -227,3 +227,4 @@ margin: 32px 0 16px;
     height: 15px;
     margin-top: 2px;
 }
+

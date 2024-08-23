@@ -97,8 +97,8 @@ function App() {
         }
         break;
       case "barcode":
-        if (value.length < 29 || value.length > 29) {
-          error = "Must be 29 characters.";
+        if (value.length < 15 || value.length > 15) {
+          error = "Must be 15 characters.";
         }
         break;
       case "barcodeFour":
@@ -397,42 +397,6 @@ function App() {
                       value={product.productDescription2}
                       onChange={(e) => handleProductChange(index, e)}
                     />
-                    <input
-                      type="text"
-                      style={{ marginTop: "4px" }}
-                      name="productDescription3"
-                      placeholder="Line 3"
-                      value={product.productDescription3}
-                      onChange={(e) => handleProductChange(index, e)}
-                    />
-                  </div>
-                  <div className="productInputDivide">
-                    <input
-                      type="text"
-                      style={{ marginTop: "4px" }}
-                      name="productDescription4"
-                      placeholder="Line 4"
-                      value={product.productDescription4}
-                      onChange={(e) => handleProductChange(index, e)}
-                    />
-                    <input
-                      type="text"
-                      style={{ marginTop: "4px" }}
-                      name="productDescription5"
-                      placeholder="Line 5"
-                      value={product.productDescription5}
-                      onChange={(e) => handleProductChange(index, e)}
-                    />
-                  </div>
-                  <div className="productInputDivide">
-                    <input
-                      type="text"
-                      style={{ marginTop: "4px" }}
-                      name="productDescription6"
-                      placeholder="Line 6"
-                      value={product.productDescription6}
-                      onChange={(e) => handleProductChange(index, e)}
-                    />
                     <div
                       style={{
                         marginTop: "4px",
@@ -456,7 +420,44 @@ function App() {
                         +
                       </button>
                     </div>
+                    {/* <input
+                      type="text"
+                      style={{ marginTop: "4px" }}
+                      name="productDescription3"
+                      placeholder="Line 3"
+                      value={product.productDescription3}
+                      onChange={(e) => handleProductChange(index, e)}
+                    /> */}
                   </div>
+                  {/* <div className="productInputDivide">
+                    <input
+                      type="text"
+                      style={{ marginTop: "4px" }}
+                      name="productDescription4"
+                      placeholder="Line 4"
+                      value={product.productDescription4}
+                      onChange={(e) => handleProductChange(index, e)}
+                    />
+                    <input
+                      type="text"
+                      style={{ marginTop: "4px" }}
+                      name="productDescription5"
+                      placeholder="Line 5"
+                      value={product.productDescription5}
+                      onChange={(e) => handleProductChange(index, e)}
+                    />
+                  </div> */}
+                  {/* <div className="productInputDivide">
+                    <input
+                      type="text"
+                      style={{ marginTop: "4px" }}
+                      name="productDescription6"
+                      placeholder="Line 6"
+                      value={product.productDescription6}
+                      onChange={(e) => handleProductChange(index, e)}
+                    />
+                    
+                  </div> */}
                   <hr style={{ margin: "8px 0" }} />
                 </div>
               ))}
@@ -521,7 +522,7 @@ function App() {
                 <p style={{ color: "red" }}>{errors.barcode}</p>
               )}
               {formData.barcode && (
-                <Barcode value={formData.barcode} width={1} fontSize={0} />
+                <Barcode value={formData.barcode} width={3} fontSize={0} />
               )}
               <div style={{ textAlign: "right" }}>
                 <input
@@ -658,7 +659,7 @@ function App() {
         </form>
       )}
 
-      {show && (
+      {!show && (
         <div className="container">
           <div className="logo_container">
             <img className="logo" src={logo} alt="logo" />
@@ -666,7 +667,7 @@ function App() {
           <div className="address_name">
             <p className="address">{formData.address}</p> {/* form */}
             <div className="name_code">
-              <p className="name">MANAGER: {formData.managerName}</p>
+              <p className="name">STORE MGR {formData.managerName}</p>
               <p className="code">
                 {formData.managerCode.substring(0, 3)}-
                 {formData.managerCode.substring(3, 6)}-
@@ -745,7 +746,7 @@ function App() {
               <span>{ampm}</span>
             </p>
             {/* <img className="barcode_image" src={barcode} alt="logo" /> */}
-            <Barcode value={formData.barcode} width={1} fontSize={0} />
+            <Barcode value={formData.barcode} width={3} fontSize={0} />
             <p className="barcode_lower">
               {formData.dateTimeStatusCode?.substring(0, 4) +
                 " " +

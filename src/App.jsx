@@ -162,7 +162,7 @@ function App() {
 
     const [hours, minutes] = time.split(":").map(Number);
     const ampm = hours >= 12 ? "PM" : "AM";
-    const hours12 = hours % 12 || 12;
+    const hours12 = (hours % 12 || 12).toString().padStart(2, "0");
     const minutesFormatted = minutes?.toString().padStart(2, "0");
 
     return { time12: `${hours12}:${minutesFormatted}`, ampm };
@@ -522,7 +522,7 @@ function App() {
                 <p style={{ color: "red" }}>{errors.barcode}</p>
               )}
               {formData.barcode && (
-                <Barcode value={formData.barcode} width={3} fontSize={0} />
+                <Barcode value={formData.barcode} width={3.2} fontSize={0} />
               )}
               <div style={{ textAlign: "right" }}>
                 <input
@@ -660,6 +660,163 @@ function App() {
       )}
 
       {!show && (
+        <div className="container1">
+          <div className="logo_container">
+            <img className="logo" src={logo} alt="logo" />
+          </div>
+          <div className="address_name">
+            <p className="address">{formData.address}</p> {/* form */}
+            <div className="name_code">
+              <p className="name">STORE MGR {formData.managerName}</p>
+              <p className="code">
+                {formData.managerCode.substring(0, 3)}-
+                {formData.managerCode.substring(3, 6)}-
+                {formData.managerCode.substring(6, 10)}
+              </p>
+            </div>
+          </div>
+          <div className="date_time_status">
+            <div>
+              <p>
+                {formData.dateTimeStatusCode?.substring(0, 4)}{" "}
+                {formData.dateTimeStatusCode?.substring(4, 9)}{" "}
+                {formData.dateTimeStatusCode?.substring(9, 14)}
+              </p>
+              <p>{formData.dateTimeStatusType}</p>
+            </div>
+            <div className="date_time">
+              <p>{formatDate(formData.date)}</p>
+              <p>
+                {time12} {ampm}
+              </p>
+            </div>
+          </div>
+          <div className="products">
+            {formData.products.map((product, index) => (
+              <div className="product" key={index}>
+                <p className="product_name">
+                  <span className="text-content">
+                    {/* {product.productId} {product.productName} */}
+                    {product.productId}{" "}
+                    {product.productName.split("<A>")[0] +
+                      (product.productName.includes("<A>") ? "<A>" : "")}
+                    {product.productDescription2 && <br />}
+                    {product.productDescription2}
+                    {product.productDescription3 && <br />}
+                    {product.productDescription3}
+                    {product.productDescription4 && <br />}
+                    {product.productDescription4}
+                    {product.productDescription5 && <br />}
+                    {product.productDescription5}
+                    {product.productDescription6 && <br />}
+                    {product.productDescription6}
+                  </span>
+                </p>
+                <p>{parseFloat(product?.productPrice).toFixed(2)}</p>
+              </div>
+            ))}
+          </div>
+          <div className="calculation">
+            <div className="subtotal">
+              <p>SUBTOTAL</p>
+              <p>{calculateSubtotal()}</p>
+            </div>
+            <div className="sales_tax">
+              <p>SALES TAX</p>
+              <p>{parseFloat(formData?.tax).toFixed(2)}</p>
+            </div>
+            <div className="total">
+              <p>TOTAL</p>
+              <p>${getTotal()}</p>
+            </div>
+            <div className="cash">
+              <p>CASH</p>
+              <p>{parseFloat(formData?.cashAmount).toFixed(2)}</p>
+            </div>
+            <div className="charge_due">
+              <p>CHANGE DUE</p>
+              <p>{getChargeDue()}</p>
+            </div>
+          </div>
+          <div className="barcode">
+            <p className="barcode_time_date">
+              <span>{formData.dateTimeStatusCode?.substring(0, 4)}</span>
+              <span>{formatDate(formData.date)}</span>
+              <span>{time12}</span>
+              <span>{ampm}</span>
+            </p>
+            {/* <img className="barcode_image" src={barcode} alt="logo" /> */}
+            <Barcode value={formData.barcode} width={3.2} fontSize={0} />
+            <p className="barcode_lower">
+              {formData.dateTimeStatusCode?.substring(0, 4) +
+                " " +
+                formData.dateTimeStatusCode?.substring(7, 9) +
+                " " +
+                formData.dateTimeStatusCode?.substring(9, 14) +
+                " " +
+                formatDateWithFullYear(formData.date) +
+                " " +
+                formData.barcodeFour}
+            </p>
+          </div>
+          <div className="return_policy">
+            <p className="title">RETURN POLICY DEFINITIONS</p>
+            <div className="expire">
+              <p>A</p>
+              <div>
+                <p>POLICY ID</p>
+                <p className="center">{formData.policyId}</p>
+              </div>
+              <div>
+                <p>DAYS</p>
+                <p className="center">{formData.policyDays}</p>
+              </div>
+              <div>
+                <p>POLICY EXPIRES ON</p>
+                <p className="center">
+                  {formatDateWithFullYear(formData.policyDate)}
+                </p>
+              </div>
+            </div>
+          </div>
+          {formData.showSecondPart && (
+            <>
+              <p className="star">
+                *******************************************
+              </p>{" "}
+              <p className="did_we_nail_it">DID WE NAIL IT?</p>
+              <div className="footer">
+                <p>
+                  Take a short survey for a chance TO WIN A $5,000 HOME DEPOT
+                  GIFT CARD
+                </p>
+                <div className="middle">
+                  <p>Opine en español</p>
+                  <p className="link">wwww.homedepot.com/survey</p>
+                  <div>
+                    <p>
+                      User ID: {formData.userId?.substring(0, 3)}{" "}
+                      {formData.userId?.substring(3, 9)}{" "}
+                      {formData.userId?.substring(9, 15)}
+                    </p>
+                    {/* formData.dateTimeStatusCode?.substring(0, 4) */}
+                    <p>
+                      PASSWORD: {formData.userPassword?.substring(0, 5)}{" "}
+                      {formData.userPassword?.substring(5, 11)}
+                    </p>
+                  </div>
+                </div>
+                <p>
+                  Entries must be completed within 14 days Of purchase. Entrants
+                  must be 18 or Older to enter. See the complete rules on
+                  website. No purchase necessary.
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+            {show && (
         <div className="container">
           <div className="logo_container">
             <img className="logo" src={logo} alt="logo" />
@@ -746,7 +903,7 @@ function App() {
               <span>{ampm}</span>
             </p>
             {/* <img className="barcode_image" src={barcode} alt="logo" /> */}
-            <Barcode value={formData.barcode} width={3} fontSize={0} />
+            <Barcode value={formData.barcode} width={3.2} fontSize={0} />
             <p className="barcode_lower">
               {formData.dateTimeStatusCode?.substring(0, 4) +
                 " " +

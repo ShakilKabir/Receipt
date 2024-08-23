@@ -16,6 +16,7 @@ function App() {
     time: "",
     tax: "",
     cashAmount: "",
+    showSecondPart: false,
     userId: "",
     userPassword: "",
     barcode: "",
@@ -26,8 +27,13 @@ function App() {
     products: [
       {
         productId: "",
-        productName: "",
         productPrice: "",
+        productName: "",
+        productDescription2: "",
+        productDescription3: "",
+        productDescription4: "",
+        productDescription5: "",
+        productDescription6: "",
       },
     ],
   });
@@ -35,10 +41,10 @@ function App() {
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, type, value, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     });
     validateField(name, value);
   };
@@ -59,7 +65,16 @@ function App() {
       ...formData,
       products: [
         ...formData.products,
-        { productId: "", productName: "", productPrice: "" },
+        {
+          productId: "",
+          productName: "",
+          productPrice: "",
+          productDescription2: "",
+          productDescription3: "",
+          productDescription4: "",
+          productDescription5: "",
+          productDescription6: "",
+        },
       ],
     });
   };
@@ -92,12 +107,17 @@ function App() {
         }
         break;
       case "userId":
-        if (value.length < 15 || value.length > 15) {
+        if (formData.showSecondPart && (value.length !== 15)) {
           error = "Must be 15 characters.";
         }
         break;
+      case "managerCode":
+        if (value.length < 10 || value.length > 10) {
+          error = "Must be 10 characters.";
+        }
+        break;
       case "userPassword":
-        if (value.length < 11 || value.length > 11) {
+        if (formData.showSecondPart && (value.length !== 11)) {
           error = "Must be 11 characters.";
         }
         break;
@@ -105,6 +125,8 @@ function App() {
         break;
     }
 
+    console.log(error);
+    
     setErrors((prevErrors) => ({
       ...prevErrors,
       [name]: error,
@@ -114,8 +136,8 @@ function App() {
   const validateProductField = (index, name, value) => {
     let error = "";
 
-    if (name === "productId" && (value.length < 12 || value.length > 12)) {
-      error = "Product ID must be 12 characters.";
+    if (name === "productId" && value.length > 15) {
+      error = "Max 15 characters.";
     }
 
     setErrors((prevErrors) => ({
@@ -127,12 +149,12 @@ function App() {
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     const [year, month, day] = dateStr.split("-");
-    return `${day}/${month}/${year.slice(2)}`;
+    return `${month}/${day}/${year.slice(2)}`;
   };
   const formatDateWithFullYear = (dateStr) => {
     if (!dateStr) return "";
     const [year, month, day] = dateStr.split("-");
-    return `${day}/${month}/${year}`;
+    return `${month}/${day}/${year}`;
   };
 
   const formatTimeTo12Hour = (time) => {
@@ -188,13 +210,19 @@ function App() {
       policyId,
       policyDays,
       policyDate,
+      showSecondPart
     } = formData;
 
     // Validate all fields
     validateField("dateTimeStatusCode", dateTimeStatusCode);
     validateField("barcode", barcode);
-    validateField("userId", userId);
-    validateField("userPassword", userPassword);
+    if (showSecondPart) {
+      validateField("userId", userId);
+      validateField("userPassword", userPassword);
+    }else{
+      validateField("userId", "111111111111111");
+      validateField("userPassword", "11111111111");
+    }
 
     // Validate all products
     formData.products.forEach((product, index) => {
@@ -203,6 +231,8 @@ function App() {
 
     // Check for required fields and errors
     const hasErrors = Object.values(errors).some((error) => error);
+    console.log(hasErrors);
+    
     if (
       !address ||
       !managerName ||
@@ -213,8 +243,6 @@ function App() {
       !time ||
       !tax ||
       !cashAmount ||
-      !userId ||
-      !userPassword ||
       !barcode ||
       !policyId ||
       !policyDays ||
@@ -225,6 +253,12 @@ function App() {
         "All fields are required and must meet the validation criteria!"
       );
       return;
+    }
+    if (showSecondPart) {
+      if (!userId || !userPassword) {
+        toast.error("User ID and User Password are required when showing the second part!");
+        return;
+      }
     }
 
     setShow(true);
@@ -251,23 +285,26 @@ function App() {
               </div>
               <div className="name_code">
                 <div className="name">
-                  <span>MANAGER:</span>{" "}
+                  {/* <span>STORE MGR.</span>{" "} */}
                   <input
                     type="text"
                     name="managerName"
-                    placeholder="Manager Name"
+                    placeholder="STORE MGR."
                     value={formData.managerName}
                     onChange={handleChange}
                   />
                 </div>
                 <div className="code">
                   <input
-                    type="text"
+                    type="number"
                     name="managerCode"
-                    placeholder="Manager Code"
+                    placeholder="Mobile No."
                     value={formData.managerCode}
                     onChange={handleChange}
                   />
+                  {errors.managerCode && (
+                    <p style={{ color: "red" }}>{errors.managerCode}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -319,12 +356,8 @@ function App() {
 
             <div className="products">
               {formData.products.map((product, index) => (
-                <div
-                  key={index}
-                  className="product"
-                  style={{ marginTop: "8px" }}
-                >
-                  <div>
+                <div key={index} className="product">
+                  <div className="productInputDivide">
                     <input
                       type="text"
                       name="productId"
@@ -338,20 +371,66 @@ function App() {
                       </p>
                     )}
                     <input
-                      type="text"
-                      style={{ marginTop: "4px" }}
-                      name="productName"
-                      placeholder="Product Name"
-                      value={product.productName}
+                      type="number"
+                      name="productPrice"
+                      placeholder="Product Price"
+                      value={product.productPrice}
                       onChange={(e) => handleProductChange(index, e)}
                     />
                   </div>
                   <div>
                     <input
-                      type="number"
-                      name="productPrice"
-                      placeholder="Product Price"
-                      value={product.productPrice}
+                      type="text"
+                      style={{ marginTop: "4px" }}
+                      name="productName"
+                      placeholder="Product Description Line 1 with <A>"
+                      value={product.productName}
+                      onChange={(e) => handleProductChange(index, e)}
+                    />
+                  </div>
+                  <div className="productInputDivide">
+                    <input
+                      type="text"
+                      style={{ marginTop: "4px" }}
+                      name="productDescription2"
+                      placeholder="Line 2"
+                      value={product.productDescription2}
+                      onChange={(e) => handleProductChange(index, e)}
+                    />
+                    <input
+                      type="text"
+                      style={{ marginTop: "4px" }}
+                      name="productDescription3"
+                      placeholder="Line 3"
+                      value={product.productDescription3}
+                      onChange={(e) => handleProductChange(index, e)}
+                    />
+                  </div>
+                  <div className="productInputDivide">
+                    <input
+                      type="text"
+                      style={{ marginTop: "4px" }}
+                      name="productDescription4"
+                      placeholder="Line 4"
+                      value={product.productDescription4}
+                      onChange={(e) => handleProductChange(index, e)}
+                    />
+                    <input
+                      type="text"
+                      style={{ marginTop: "4px" }}
+                      name="productDescription5"
+                      placeholder="Line 5"
+                      value={product.productDescription5}
+                      onChange={(e) => handleProductChange(index, e)}
+                    />
+                  </div>
+                  <div className="productInputDivide">
+                    <input
+                      type="text"
+                      style={{ marginTop: "4px" }}
+                      name="productDescription6"
+                      placeholder="Line 6"
+                      value={product.productDescription6}
                       onChange={(e) => handleProductChange(index, e)}
                     />
                     <div
@@ -378,6 +457,7 @@ function App() {
                       </button>
                     </div>
                   </div>
+                  <hr style={{ margin: "8px 0" }} />
                 </div>
               ))}
             </div>
@@ -440,14 +520,19 @@ function App() {
               {errors.barcode && (
                 <p style={{ color: "red" }}>{errors.barcode}</p>
               )}
-              <input
-                type="text"
-                name="barcodeFour"
-                placeholder="Barcode Four Digit"
-                value={formData.barcodeFour}
-                onChange={handleChange}
-                style={{ marginTop: "4px" }}
-              />
+              {formData.barcode && (
+                <Barcode value={formData.barcode} width={1} fontSize={0} />
+              )}
+              <div style={{ textAlign: "right" }}>
+                <input
+                  type="text"
+                  name="barcodeFour"
+                  placeholder="Barcode Four Digit"
+                  value={formData.barcodeFour}
+                  onChange={handleChange}
+                  style={{ marginTop: "4px", width: "140px" }}
+                />
+              </div>
               {errors.barcodeFour && (
                 <p style={{ color: "red" }}>{errors.barcodeFour}</p>
               )}
@@ -478,7 +563,7 @@ function App() {
                   />
                 </div>
                 <div>
-                  <p>POLICY EXPIRES</p>
+                  <p>POLICY EXPIRES ON</p>
                   <input
                     type="date"
                     name="policyDate"
@@ -490,11 +575,23 @@ function App() {
               </div>
             </div>
 
-            <p className="star">*******************************************</p>
-            <p className="did_we_nail_it">DID WE NAIL IT?</p>
+            <div className="showSecondPartContainer">
+              <input
+                type="checkbox"
+                name="showSecondPart"
+                checked={formData.showSecondPart}
+                onChange={handleChange}
+              />
+              <p>Show Second Part</p>
+            </div>
+
+            {formData.showSecondPart && <><p className="star">
+              ********************************************************
+            </p>
+            <p className="did_we_nail_it">DID WE NAIL IT?</p></>}
 
             <div className="footer">
-              <p>
+              {formData.showSecondPart && <><p>
                 Take a short survey for a chance TO WIN A $5,000 HOME DEPOT GIFT
                 CARD
               </p>
@@ -549,7 +646,7 @@ function App() {
                 Entries must be completed within 14 days Of purchase. Entrants
                 must be 18 or Older to enter. See the complete rules on website.
                 No purchase necessary.
-              </p>
+              </p></>}
               <button
                 type="submit"
                 style={{ width: "100px", height: "30px", marginTop: "10px" }}
@@ -570,7 +667,11 @@ function App() {
             <p className="address">{formData.address}</p> {/* form */}
             <div className="name_code">
               <p className="name">MANAGER: {formData.managerName}</p>
-              <p className="code">{formData.managerCode}</p>
+              <p className="code">
+                {formData.managerCode.substring(0, 3)}-
+                {formData.managerCode.substring(3, 6)}-
+                {formData.managerCode.substring(6, 10)}
+              </p>
             </div>
           </div>
           <div className="date_time_status">
@@ -594,7 +695,20 @@ function App() {
               <div className="product" key={index}>
                 <p className="product_name">
                   <span className="text-content">
-                    {product.productId} {product.productName}
+                    {/* {product.productId} {product.productName} */}
+                    {product.productId}{" "}
+                    {product.productName.split("<A>")[0] +
+                      (product.productName.includes("<A>") ? "<A>" : "")}
+                    {product.productDescription2 && <br />}
+                    {product.productDescription2}
+                    {product.productDescription3 && <br />}
+                    {product.productDescription3}
+                    {product.productDescription4 && <br />}
+                    {product.productDescription4}
+                    {product.productDescription5 && <br />}
+                    {product.productDescription5}
+                    {product.productDescription6 && <br />}
+                    {product.productDescription6}
                   </span>
                 </p>
                 <p>{parseFloat(product?.productPrice).toFixed(2)}</p>
@@ -657,44 +771,48 @@ function App() {
                 <p className="center">{formData.policyDays}</p>
               </div>
               <div>
-                <p>POLICY EXPIRES</p>
+                <p>POLICY EXPIRES ON</p>
                 <p className="center">
                   {formatDateWithFullYear(formData.policyDate)}
                 </p>
               </div>
             </div>
           </div>
-          {/* <p className="star">*******************************************</p> */}
-          <p className="star">***********************************</p>{" "}
-          {/* after adding font family */}
-          <p className="did_we_nail_it">DID WE NAIL IT?</p>
-          <div className="footer">
-            <p>
-              Take a short survey for a chance TO WIN A $5,000 HOME DEPOT GIFT
-              CARD
-            </p>
-            <div className="middle">
-              <p>Opine en español</p>
-              <p className="link">wwww.homedepot.com/survey</p>
-              <div>
+          {formData.showSecondPart && (
+            <>
+              <p className="star">
+                *******************************************
+              </p>{" "}
+              <p className="did_we_nail_it">DID WE NAIL IT?</p>
+              <div className="footer">
                 <p>
-                  User ID: {formData.userId?.substring(0, 3)}{" "}
-                  {formData.userId?.substring(3, 9)}{" "}
-                  {formData.userId?.substring(9, 15)}
+                  Take a short survey for a chance TO WIN A $5,000 HOME DEPOT
+                  GIFT CARD
                 </p>
-                {/* formData.dateTimeStatusCode?.substring(0, 4) */}
+                <div className="middle">
+                  <p>Opine en español</p>
+                  <p className="link">wwww.homedepot.com/survey</p>
+                  <div>
+                    <p>
+                      User ID: {formData.userId?.substring(0, 3)}{" "}
+                      {formData.userId?.substring(3, 9)}{" "}
+                      {formData.userId?.substring(9, 15)}
+                    </p>
+                    {/* formData.dateTimeStatusCode?.substring(0, 4) */}
+                    <p>
+                      PASSWORD: {formData.userPassword?.substring(0, 5)}{" "}
+                      {formData.userPassword?.substring(5, 11)}
+                    </p>
+                  </div>
+                </div>
                 <p>
-                  PASSWORD: {formData.userPassword?.substring(0, 5)}{" "}
-                  {formData.userPassword?.substring(5, 11)}
+                  Entries must be completed within 14 days Of purchase. Entrants
+                  must be 18 or Older to enter. See the complete rules on
+                  website. No purchase necessary.
                 </p>
               </div>
-            </div>
-            <p>
-              Entries must be completed within 14 days Of purchase. Entrants
-              must be 18 or Older to enter. See the complete rules on website.
-              No purchase necessary.
-            </p>
-          </div>
+            </>
+          )}
         </div>
       )}
       <ToastContainer />

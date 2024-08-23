@@ -1,5 +1,3 @@
-
-
 /* 
     1. Need to work with font size
     8.5=11.33, 15=20, 10=13.33, 10.5=14, 
@@ -56,11 +54,23 @@ body {
   font-weight: 400;
   font-style: normal;
 }
+.address_name .address {
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .address_name .name_code {
   display: flex;
   justify-content: space-between;
+  gap: 4px;
   padding: 0 8px;
+}
+.address_name .name_code .name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .date_time_status {
@@ -109,13 +119,13 @@ margin: 32px 0 16px;
   display: flex;
   justify-content: space-between;
   font-size: 20px;
-  margin-bottom: -8px;
+  margin-bottom: -10px;
   position: relative;
   z-index: 9;
 }
 .barcode svg {
   width: 88%;
-  height: 100%;
+  height: 75px;
   display: block;
   margin: 0 auto;
 }
@@ -124,12 +134,13 @@ margin: 32px 0 16px;
   text-align: center;
   /* line-height: 6px; */
   /* line-height: 85%; */
-  margin-top: -7px;
+  margin-top: -9px;
   position: relative;
 }
 
 .return_policy {
   font-size: 11.33px;
+  padding-bottom: 16px
 }
 .return_policy .title {
   text-align: center;
@@ -149,11 +160,12 @@ margin: 32px 0 16px;
 .star {
   font-size: 11.33px;
   text-align: center;
-  margin-top: 16px
 }
 .did_we_nail_it {
   font-size: 14px;
   text-align: center;
+  font-weight: bold;
+  letter-spacing: 3px;
 }
 
 .footer {
@@ -189,7 +201,12 @@ margin: 32px 0 16px;
   width: 97px;
 }
 .input_container .products .product {
+  display: unset;
   align-items: unset;
+}
+.input_container .products .product .productInputDivide {
+  display: flex;
+  gap: 4px;
 }
 
 .input_container .subtotal, .input_container .sales_tax, .input_container .total, .input_container .cash, .input_container .charge_due {
@@ -197,4 +214,16 @@ margin: 32px 0 16px;
   width: 255px;
   justify-content: space-between;
   align-items: center;
+}
+.input_container .showSecondPartContainer{
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 20px;
+}
+.input_container .showSecondPartContainer input{
+    width: 15px;
+    height: 15px;
+    margin-top: 2px;
 }

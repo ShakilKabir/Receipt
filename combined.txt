@@ -15,7 +15,6 @@ import LoginPage from "./pages/Login";
 import AdminPage from "./pages/Admin";
 import ReceiptPage from "./pages/ReceiptPage";
 import HistoryPage from "./pages/History";
-import { jwtDecode } from "jwt-decode";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -61,24 +60,6 @@ function App() {
   useEffect(() => {
     updateBarcode();
   }, [formData.dateTimeStatusCode, formData.date]);
-
-    useEffect(() => {
-    // Check if the token exists in localStorage
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        // Decode the token to get the user role
-        const decodedToken = jwtDecode(token);
-        setUserRole(decodedToken.role);
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error("Error decoding token:", error);
-        setIsAuthenticated(false);
-        setUserRole(null);
-      }
-    }
-  }, []);
-
 
   const handleChange = (e) => {
     const { name, type, value, checked } = e.target;
@@ -867,3 +848,1073 @@ function App() {
 }
 
 export default App;
+/* 
+    1. Need to work with font size
+    8.5=11.33, 15=20, 10=13.33, 10.5=14, 
+    2. Font family 
+*/
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Courier Prime", monospace;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: -1px;
+}
+
+body {
+  background-color: #ddd;
+}
+
+.address_name,
+.date_time_status,
+.products,
+.calculation {
+  font-size: 11.33px;
+}
+.subtotal, .sales_tax, .total, .cash, .charge_due {
+  display: flex;
+  width: 140px;
+  justify-content: space-between;
+}
+
+.container1 {
+  margin: 0 auto;
+  width: 375px;
+  padding: 0 30px;
+  background-color: white;
+}
+
+.container {
+  margin: 0 auto;
+  width: 300px;
+  padding: 0 30px;
+  background-color: white;
+}
+
+.logo_container {
+  padding-top: 50px;
+}
+.logo_container .logo {
+  width: 236px;
+  height: 84.5px;
+  display: block;
+  margin: 0 auto 32px;
+}
+
+.address_name {
+  margin-bottom: 16px;
+  font-family: "Courier Prime", monospace;
+  font-weight: 400;
+  font-style: normal;
+}
+.address_name .address {
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.address_name .name_code {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 0 8px;
+}
+.address_name .name_code .name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.date_time_status {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+}
+.date_time_status .date_time {
+  display: flex;
+  gap: 8px;
+}
+
+.products {
+  margin-bottom: 12px;
+}
+.products .product {
+  display: flex;
+  gap: 4px;
+  align-items: end;
+  justify-content: space-between;
+}
+.products .product .product_name {
+  margin: 0;
+  position: relative;
+
+}
+.products .product .product_name .text-content {
+  display: inline-block;
+  text-indent: -16px;
+  padding-left: 16px; 
+}
+
+.calculation {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+}
+.calculation .charge_due {
+  padding-left: 16px;
+}
+
+.barcode {
+margin: 32px 0 16px;
+}
+.barcode .barcode_time_date {
+  display: flex;
+  justify-content: space-between;
+  font-size: 20px;
+  margin-bottom: -10px;
+  margin-left: -6px;
+  margin-right: -6px;
+  position: relative;
+  z-index: 9;
+}
+.barcode svg {
+  width: 88%;
+  height: 55px;
+  display: block;
+  margin: 0 auto;
+}
+.barcode .barcode_lower {
+  font-size: 12.33px;
+  text-align: center;
+  /* line-height: 6px; */
+  /* line-height: 85%; */
+  margin-top: -12px;
+  position: relative;
+}
+
+.return_policy {
+  font-size: 11.33px;
+  padding-bottom: 16px
+}
+.return_policy .title {
+  text-align: center;
+}
+.return_policy .expire {
+  /* padding-left: 8px; */
+  padding-right: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+}
+.return_policy .expire .center {
+  display: flex;
+  justify-content: center;
+}
+
+.star {
+  font-size: 11.33px;
+  text-align: center;
+}
+.did_we_nail_it {
+  font-size: 14px;
+  text-align: center;
+  font-weight: bold;
+  letter-spacing: 3px;
+}
+
+.footer {
+  text-align: center;
+  font-size: 11.33px;
+  padding-bottom: 50px;
+}
+.footer .middle, .link {
+  margin: 8px 0 16px;
+}
+
+/* input field css start from here  */
+.input_container {
+  margin: 0 auto;
+  width: 375px;
+  padding: 0 20px;
+  background-color: white;
+}
+
+.input_container input {
+  width: 100%;
+  height: 35px;
+  padding-left: 5px;
+  border-radius: 3px;
+}
+.input_container .name_code {
+  padding: 0;
+  margin-top: 5px;
+  gap: 4px;
+  align-items: end;
+}
+.input_container .name_code .name input {
+  width: 97px;
+}
+.input_container .products .product {
+  display: unset;
+  align-items: unset;
+}
+.input_container .products .product .productInputDivide {
+  display: flex;
+  gap: 4px;
+}
+
+.input_container .subtotal, .input_container .sales_tax, .input_container .total, .input_container .cash, .input_container .charge_due {
+  display: flex;
+  width: 255px;
+  justify-content: space-between;
+  align-items: center;
+}
+.input_container .showSecondPartContainer{
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 20px;
+}
+.input_container .showSecondPartContainer input{
+    width: 15px;
+    height: 15px;
+    margin-top: 2px;
+}
+
+/* src/pages/AdminPage.css */
+.admin-container {
+  padding: 20px;
+}
+
+.admin-section {
+  margin-bottom: 30px;
+}
+
+.admin-section form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-section form input,
+.admin-section form select {
+  padding: 8px;
+  font-size: 16px;
+}
+
+.admin-section form button {
+  padding: 10px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.admin-section form button:hover {
+  background-color: #0056b3;
+}
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter as Router } from 'react-router-dom';
+import App from './App.jsx';
+import './index.css';
+import "react-toastify/dist/ReactToastify.css";
+
+const root = createRoot(document.getElementById('root'));
+root.render(
+  <Router>
+    <App />
+  </Router>
+);
+// src/pages/AdminPage.js
+import React, { useState } from 'react';
+import axios from '../utils/axiosConfig';
+import { toast } from 'react-toastify';
+
+const AdminPage = () => {
+  const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '' });
+  const [newUserData, setNewUserData] = useState({ username: '', password: '', role: 'user' });
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData({ ...passwordData, [name]: value });
+  };
+
+  const handleNewUserChange = (e) => {
+    const { name, value } = e.target;
+    setNewUserData({ ...newUserData, [name]: value });
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/auth/change-password', { ...passwordData }); // Use actual userId
+      toast.success(response.data.message);
+      setPasswordData({ oldPassword: '', newPassword: '' });
+    } catch (error) {
+      toast.error(error.response.data.error || 'Password change failed');
+    }
+  };
+
+  const handleNewUserSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/auth/register', newUserData);
+      toast.success(response.data.message);
+      setNewUserData({ username: '', password: '', role: 'user' });
+    } catch (error) {
+      toast.error(error.response.data.error || 'User registration failed');
+    }
+  };
+
+  return (
+    <div className="admin-container">
+      <h1>Admin Dashboard</h1>
+      <div className="admin-section">
+        <h2>Change Password</h2>
+        <form onSubmit={handlePasswordSubmit}>
+          <input
+            type="password"
+            name="oldPassword"
+            placeholder="Old Password"
+            value={passwordData.oldPassword}
+            onChange={handlePasswordChange}
+          />
+          <input
+            type="password"
+            name="newPassword"
+            placeholder="New Password"
+            value={passwordData.newPassword}
+            onChange={handlePasswordChange}
+          />
+          <button type="submit">Change Password</button>
+        </form>
+      </div>
+
+      <div className="admin-section">
+        <h2>Add New User</h2>
+        <form onSubmit={handleNewUserSubmit}>
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            value={newUserData.username}
+            onChange={handleNewUserChange}
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={newUserData.password}
+            onChange={handleNewUserChange}
+          />
+          <select
+            name="role"
+            value={newUserData.role}
+            onChange={handleNewUserChange}
+          >
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+          <button type="submit">Add User</button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default AdminPage;
+// src/pages/Login.js
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import axios from "../utils/axiosConfig";
+import { TextField, Button, Box, Typography, Paper, Avatar } from "@mui/material";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+
+const LoginPage = ({ setIsAuthenticated, setUserRole }) => {
+  const [loginData, setLoginData] = useState({ username: "", password: "" });
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setLoginData({ ...loginData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+        const response = await axios.post("/auth/login", loginData); // Adjust URL based on your API structure
+        const { token } = response.data;
+
+        // Log the received token
+        console.log("Received token:", token);
+
+        // Store the token in localStorage
+        localStorage.setItem("token", token);
+
+        // Decode token to get the user role
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        console.log("User Role:", payload.role); // Log the user role
+        setUserRole(payload.role); // Set the user role in state
+        setIsAuthenticated(true);
+
+        toast.success("Login successful!");
+        navigate("/"); // Redirect to the home page
+    } catch (error) {
+        toast.error("Invalid username or password");
+    }
+};
+
+  return (
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
+      bgcolor="#f4f4f4"
+    >
+      <Paper elevation={3} sx={{ padding: "30px", maxWidth: "400px", width: "100%" }}>
+        <Box display="flex" flexDirection="column" alignItems="center">
+          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Login
+          </Typography>
+        </Box>
+        <Box component="form" onSubmit={handleSubmit} mt={2}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="username"
+            label="Username"
+            name="username"
+            autoComplete="username"
+            autoFocus
+            value={loginData.username}
+            onChange={handleChange}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={loginData.password}
+            onChange={handleChange}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Login
+          </Button>
+        </Box>
+      </Paper>
+    </Box>
+  );
+};
+
+export default LoginPage;
+// src/pages/Navbar.js
+import React from "react";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import { useNavigate } from "react-router-dom";
+
+function Navbar({
+  isAuthenticated,
+  setIsAuthenticated,
+  userRole,
+  setUserRole,
+}) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Remove token from localStorage
+    setIsAuthenticated(false);
+    setUserRole(null);
+    navigate("/login");
+  };
+
+  return (
+    <AppBar position="static">
+      <Toolbar>
+        <IconButton
+          size="large"
+          edge="start"
+          color="inherit"
+          aria-label="menu"
+          sx={{ mr: 2 }}
+        >
+          <MenuIcon />
+        </IconButton>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          Receipt Generator
+        </Typography>
+        {isAuthenticated ? (
+          <>
+            <Button color="inherit" onClick={() => navigate("/")}>
+              Home
+            </Button>
+            {userRole === "admin" && (
+              <Button color="inherit" onClick={() => navigate("/admin")}>
+                Admin
+              </Button>
+            )}
+            <Button color="inherit" onClick={() => navigate("/history")}>
+              History
+            </Button>
+
+            <Button color="inherit" onClick={handleLogout}>
+              Logout
+            </Button>
+          </>
+        ) : (
+          <Button color="inherit" onClick={() => navigate("/login")}>
+            Login
+          </Button>
+        )}
+      </Toolbar>
+    </AppBar>
+  );
+}
+
+export default Navbar;
+import React, { useEffect, useRef, useState } from "react";
+import Barcode from "react-barcode";
+import logo from "../assets/logo.jpg";
+import { Button, Box } from "@mui/material";
+import { useReactToPrint } from "react-to-print";
+import html2canvas from 'html2canvas';
+import { useLocation } from "react-router-dom";
+import axios from '../utils/axiosConfig'
+
+const Receipt = ({
+  formData,
+  time12,
+  ampm,
+  formatDate,
+  formatDateWithFullYear,
+  getTotal,
+  calculateSubtotal,
+  getChargeDue,
+  containerClass,
+}) => {
+  const receiptRef = useRef(null);
+  const [barcodeImage, setBarcodeImage] = useState(null);
+  const barcodeRef = useRef(null);
+  const location = useLocation();
+
+  const isReceiptPage = location.pathname === '/receipt';
+
+  useEffect(() => {
+    if (barcodeRef.current) {
+      const svgElement = barcodeRef.current.querySelector("svg");
+      if (svgElement) {
+        const svgData = new XMLSerializer().serializeToString(svgElement);
+        const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+        const url = URL.createObjectURL(svgBlob);
+
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width; 
+          canvas.height = img.height; 
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          setBarcodeImage(canvas.toDataURL("image/png"));
+          URL.revokeObjectURL(url);
+        };
+        img.src = url;
+      }
+    }
+  }, [formData.barcode]);
+
+  useEffect(() => {
+    const saveReceiptAsPngAutomatically = async () => {
+      const node = receiptRef.current;
+      try {
+        const canvas = await html2canvas(node, {
+          backgroundColor: '#fff',
+          useCORS: true,
+          allowTaint: true,
+          scale: 2,
+        });
+
+        // Convert canvas to data URL
+        const pngData = canvas.toDataURL('image/png');
+
+        // Send the PNG data to the backend
+        const response = await axios.post('/api/receipts/save', {
+          pngData,  // Base64 encoded PNG data
+          filename: `receipt_${new Date().getTime()}.png`, // Generate a unique filename
+        });
+
+        console.log('Receipt saved automatically:', response.data.message);
+      } catch (error) {
+        console.error('Error automatically saving the receipt as PNG:', error);
+      }
+    };
+
+    if (formData && isReceiptPage) {
+      saveReceiptAsPngAutomatically();
+    }
+  }, [formData]);
+
+  const handleSaveAsPng = () => {
+    const node = receiptRef.current;
+    html2canvas(node, {
+      backgroundColor: '#fff',
+      useCORS: true,
+      allowTaint: true,
+      scale: 2,
+    })
+      .then((canvas) => {
+        const link = document.createElement('a');
+        link.download = 'receipt.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      })
+      .catch((error) => {
+        console.error('Could not generate image', error);
+      });
+  };
+
+  const handlePrint = useReactToPrint({
+    content: () => receiptRef.current,
+  });
+
+  return (
+    <div>
+      <div ref={receiptRef} className={containerClass}>
+        <div className="logo_container">
+          <img className="logo" src={logo} alt="logo" />
+        </div>
+        <div className="address_name">
+          <p className="address">{formData.address}</p>
+          <div className="name_code">
+            <p className="name">STORE MGR {formData.managerName}</p>
+            <p className="code">
+              {formData.managerCode.substring(0, 3)}-
+              {formData.managerCode.substring(3, 6)}-
+              {formData.managerCode.substring(6, 10)}
+            </p>
+          </div>
+        </div>
+        <div className="date_time_status">
+          <div>
+            <p>
+              {formData.dateTimeStatusCode?.substring(0, 4)}&nbsp;&nbsp;
+              {formData.dateTimeStatusCode?.substring(4, 9)}&nbsp;&nbsp;
+              {formData.dateTimeStatusCode?.substring(9, 14)}
+            </p>
+            <p>{formData.dateTimeStatusType}</p>
+          </div>
+          <div className="date_time">
+            <p>{formatDate(formData.date)}</p>
+            <p>
+              {time12} {ampm}
+            </p>
+          </div>
+        </div>
+        <div className="products">
+          {formData.products.map((product, index) => (
+            <div className="product" key={index}>
+              <p className="product_name">
+                <span className="text-content">
+                  {product.productId}{" "}
+                  {product.productName.split("<A>")[0] +
+                    (product.productName.includes("<A>") ? "<A>" : "")}
+                  {product.productDescription2 && <br />}
+                  {product.productDescription2}
+                  {product.productDescription3 && <br />}
+                  {product.productDescription3}
+                  {product.productDescription4 && <br />}
+                  {product.productDescription4}
+                  {product.productDescription5 && <br />}
+                  {product.productDescription5}
+                  {product.productDescription6 && <br />}
+                  {product.productDescription6}
+                </span>
+              </p>
+              <p>{parseFloat(product?.productPrice).toFixed(2)}</p>
+            </div>
+          ))}
+        </div>
+        <div className="calculation">
+          <div className="subtotal">
+            <p>SUBTOTAL</p>
+            <p>{calculateSubtotal()}</p>
+          </div>
+          <div className="sales_tax">
+            <p>SALES TAX</p>
+            <p>{parseFloat(formData?.tax).toFixed(2)}</p>
+          </div>
+          <div className="total">
+            <p>TOTAL</p>
+            <p>${getTotal()}</p>
+          </div>
+          <div className="cash">
+            <p>CASH</p>
+            <p>{parseFloat(formData?.cashAmount).toFixed(2)}</p>
+          </div>
+          <div className="charge_due">
+            <p>CHANGE DUE</p>
+            <p>{getChargeDue()}</p>
+          </div>
+        </div>
+        <div className="barcode">
+          <p className="barcode_time_date">
+            <span>{formData.dateTimeStatusCode?.substring(0, 4)}</span>
+            <span>{formatDate(formData.date)}</span>
+            <span>{time12}</span>
+            <span>{ampm}</span>
+          </p>
+          {isReceiptPage ? (
+            barcodeImage ? (
+              <img
+                src={barcodeImage}
+                alt="Barcode"
+                style={{ display: "block", margin: "0 auto", maxWidth: "100%", height: "auto" }}
+              />
+            ) : (
+              <div id="barcode" ref={barcodeRef} style={{ display: "flex", justifyContent: "center" }}>
+                <Barcode value={formData.barcode} width={1.5} height={30} fontSize={0} />
+              </div>
+            )
+          ) : (
+            <Barcode value={formData.barcode} width={1.5} height={30} fontSize={0} />
+          )}
+          <p className="barcode_lower">
+            {formData.dateTimeStatusCode?.substring(0, 4) +
+              " " +
+              formData.dateTimeStatusCode?.substring(7, 9) +
+              " " +
+              formData.dateTimeStatusCode?.substring(9, 14) +
+              " " +
+              formatDateWithFullYear(formData.date) +
+              " " +
+              formData.barcodeFour}
+          </p>
+        </div>
+        <div className="return_policy">
+          <p className="title">RETURN POLICY DEFINITIONS</p>
+          <div className="expire">
+            <p>A</p>
+            <div>
+              <p>POLICY ID</p>
+              <p className="center">{formData.policyId}</p>
+            </div>
+            <div>
+              <p>DAYS</p>
+              <p className="center">{formData.policyDays}</p>
+            </div>
+            <div>
+              <p>POLICY EXPIRES ON</p>
+              <p className="center">
+                {formatDateWithFullYear(formData.policyDate)}
+              </p>
+            </div>
+          </div>
+        </div>
+        {formData.showSecondPart && (
+          <>
+            <p className="star">*******************************************</p>{" "}
+            <p className="did_we_nail_it">DID WE NAIL IT?</p>
+            <div className="footer">
+              <p>
+                Take a short survey for a chance TO WIN A $5,000 HOME DEPOT GIFT
+                CARD
+              </p>
+              <div className="middle">
+                <p>Opine en español</p>
+                <p className="link">wwww.homedepot.com/survey</p>
+                <div>
+                  <p>
+                    User ID: {formData.userId?.substring(0, 3)}{" "}
+                    {formData.userId?.substring(3, 9)}{" "}
+                    {formData.userId?.substring(9, 15)}
+                  </p>
+                  <p>
+                    PASSWORD: {formData.userPassword?.substring(0, 5)}{" "}
+                    {formData.userPassword?.substring(5, 11)}
+                  </p>
+                </div>
+              </div>
+              <p>
+                Entries must be completed within 14 days Of purchase. Entrants
+                must be 18 or Older to enter. See the complete rules on website.
+                No purchase necessary.
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+      {/* Buttons to Save as PNG and Print */}
+      {isReceiptPage && <Box mt={2} display="flex" justifyContent="center" gap={2}>
+        <Button variant="contained" color="primary" onClick={handleSaveAsPng}>
+          Save as PNG
+        </Button>
+        <Button variant="contained" color="secondary" onClick={handlePrint}>
+          Print
+        </Button>
+      </Box>}
+    </div>
+  );
+};
+
+export default Receipt;
+import React from "react";
+import { useLocation } from "react-router-dom";
+import Receipt from "./Receipt";
+
+const ReceiptPage = () => {
+  const location = useLocation();
+  const formData = location.state?.formData;
+  const time12 = location.state?.time12;
+  const ampm = location.state?.ampm;
+
+  // Define necessary functions in this component
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const [year, month, day] = dateStr.split("-");
+    return `${month}/${day}/${year.slice(2)}`;
+  };
+
+  const formatDateWithFullYear = (dateStr) => {
+    if (!dateStr) return "";
+    const [year, month, day] = dateStr.split("-");
+    return `${month}/${day}/${year}`;
+  };
+
+  const calculateSubtotal = () => {
+    return formData.products
+      .reduce((sum, product) => {
+        const price = parseFloat(product.productPrice) || 0;
+        return sum + price;
+      }, 0)
+      .toFixed(2);
+  };
+
+  const getTotal = () => {
+    const subtotal = parseFloat(calculateSubtotal()) || 0;
+    const tax = parseFloat(formData.tax) || 0;
+    return (subtotal + tax).toFixed(2);
+  };
+
+  const getChargeDue = () => {
+    const total = parseFloat(getTotal()) || 0;
+    const cashAmount = parseFloat(formData.cashAmount) || 0;
+    return (cashAmount - total).toFixed(2);
+  };
+
+  return (
+    <div>
+      {formData ? (
+        <Receipt
+          formData={formData}
+          time12={time12}
+          ampm={ampm}
+          formatDate={formatDate}
+          formatDateWithFullYear={formatDateWithFullYear}
+          calculateSubtotal={calculateSubtotal}
+          getTotal={getTotal}
+          getChargeDue={getChargeDue}
+          containerClass="container"
+        />
+      ) : (
+        <p>No receipt data available</p>
+      )}
+    </div>
+  );
+};
+
+export default ReceiptPage;
+import React, { useEffect, useState } from "react";
+import { Button, Box, Modal, Typography, Card, CardContent, CardActions, IconButton, Pagination } from "@mui/material";
+import { Preview, Delete, Download } from "@mui/icons-material";
+import axios from '../utils/axiosConfig'
+
+const HistoryPage = () => {
+  const [receipts, setReceipts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const limit = 100;
+  
+  useEffect(() => {
+    // Check the token in the component
+    const token = localStorage.getItem('token');
+    console.log('Token in HistoryPage:', token);
+
+    fetchReceipts();
+  }, [page]);
+
+  const fetchReceipts = async () => {
+    try {
+        const response = await axios.get('/api/receipts', {
+            params: { page, limit }
+        });
+        console.log('Fetched receipts:', response.data.files); // Ensure this logs the correct files
+        setReceipts(response.data.files);
+    } catch (error) {
+        console.error('Could not fetch receipts', error);
+    }
+};
+
+  const handleDownload = async (filename) => {
+    try {
+      const response = await axios.get(`/api/receipts/download/${filename}`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Could not download receipt', error);
+    }
+  };
+
+  const handleDelete = async (filename) => {
+    try {
+      await axios.delete(`/api/receipts/${filename}`);
+      fetchReceipts();
+    } catch (error) {
+      console.error('Could not delete receipt', error);
+    }
+  };
+
+  const handlePreview = async (filename) => {
+    try {
+      const response = await axios.get(`/api/receipts/download/${filename}`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      setSelectedReceipt(url);
+      setPreviewOpen(true);
+    } catch (error) {
+      console.error('Could not preview receipt', error);
+    }
+  };
+
+  const handleClosePreview = () => {
+    setPreviewOpen(false);
+    setSelectedReceipt(null);
+  };
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" component="h2" gutterBottom>
+        Receipt History
+      </Typography>
+      {receipts.map((file, index) => (
+        <Card key={index} sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <CardContent>
+            <Typography variant="body1">{file}</Typography>
+          </CardContent>
+          <CardActions>
+            <IconButton color="primary" onClick={() => handlePreview(file)}>
+              <Preview />
+            </IconButton>
+            <IconButton color="primary" onClick={() => handleDownload(file)}>
+              <Download />
+            </IconButton>
+            <IconButton color="secondary" onClick={() => handleDelete(file)}>
+              <Delete />
+            </IconButton>
+          </CardActions>
+        </Card>
+      ))}
+      <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+        <Pagination 
+          count={Math.ceil(receipts.length / limit)} 
+          page={page} 
+          onChange={(e, value) => setPage(value)} 
+          color="primary" 
+        />
+      </Box>
+
+      {/* Modal for Preview */}
+      <Modal open={previewOpen} onClose={handleClosePreview}>
+        <Box 
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '90%',  // Adjust the width to a smaller percentage to fit within the window
+            maxWidth: '600px',  // Add a max-width to limit the modal size
+            bgcolor: 'background.paper',
+            borderRadius: 1,
+            boxShadow: 24,
+            p: 2,  // Reduce padding to save space
+            overflowY: 'auto',  // Add overflow to handle large content
+            maxHeight: '90vh',  // Ensure the modal doesn't exceed the viewport height
+          }}
+        >
+          <img 
+            src={selectedReceipt} 
+            alt="Receipt Preview" 
+            style={{ 
+              width: '100%', 
+              height: 'auto', 
+              maxHeight: '80vh',  // Ensure the image doesn't exceed the viewport height
+              objectFit: 'contain'  // Adjust image scaling to maintain aspect ratio within the modal
+            }} 
+          />
+        </Box>
+      </Modal>
+    </Box>
+  );
+};
+
+export default HistoryPage;
+import axios from 'axios';
+
+// Set the base URL for all axios requests
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+const axiosInstance = axios.create({
+  baseURL: apiUrl,
+});
+
+// Attach the token to the request
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  console.log('Extracted Token:', token);
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    console.error('No token found in localStorage');
+  }
+
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
+export default axiosInstance;

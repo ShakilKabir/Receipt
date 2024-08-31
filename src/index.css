@@ -126,7 +126,7 @@ margin: 32px 0 16px;
   display: flex;
   justify-content: space-between;
   font-size: 20px;
-  margin-bottom: -7px;
+  margin-bottom: -10px;
   margin-left: -6px;
   margin-right: -6px;
   position: relative;
@@ -143,7 +143,7 @@ margin: 32px 0 16px;
   text-align: center;
   /* line-height: 6px; */
   /* line-height: 85%; */
-  margin-top: -7px;
+  margin-top: -12px;
   position: relative;
 }
 
@@ -237,3 +237,36 @@ margin: 32px 0 16px;
     margin-top: 2px;
 }
 
+/* src/pages/AdminPage.css */
+.admin-container {
+  padding: 20px;
+}
+
+.admin-section {
+  margin-bottom: 30px;
+}
+
+.admin-section form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-section form input,
+.admin-section form select {
+  padding: 8px;
+  font-size: 16px;
+}
+
+.admin-section form button {
+  padding: 10px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.admin-section form button:hover {
+  background-color: #0056b3;
+}

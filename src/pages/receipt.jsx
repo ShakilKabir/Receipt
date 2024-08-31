@@ -201,7 +201,7 @@ const Receipt = ({
               </div>
             )
           ) : (
-            <Barcode value={formData.barcode} width={1.5} height={30} fontSize={0} />
+            <Barcode value={formData.barcode} width={3} height={30} fontSize={0} />
           )}
           <p className="barcode_lower">
             {formData.dateTimeStatusCode?.substring(0, 4) +

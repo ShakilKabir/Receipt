@@ -197,7 +197,7 @@ const Receipt = ({
               />
             ) : (
               <div id="barcode" ref={barcodeRef} style={{ display: "flex", justifyContent: "center" }}>
-                <Barcode value={formData.barcode} width={1.5} height={30} fontSize={0} />
+                <Barcode value={formData.barcode} width={1.5} height={45} fontSize={0} />
               </div>
             )
           ) : (

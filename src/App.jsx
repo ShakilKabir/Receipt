@@ -251,6 +251,12 @@ function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (!isAuthenticated) {
+      toast.error("You must be logged in to submit the form.");
+      navigate("/login");
+      return;
+    }  
+
     validateField("dateTimeStatusCode", formData.dateTimeStatusCode);
     validateField("barcode", formData.barcode);
     if (formData.showSecondPart) {
@@ -358,9 +364,8 @@ function App() {
           }
         />
         <Route
-          path="/"
+          path="/generate"
           element={
-            isAuthenticated ? (
               !show ? (
                 <>
                   <form onSubmit={handleSubmit}>
@@ -792,7 +797,7 @@ function App() {
                       calculateSubtotal={calculateSubtotal}
                       getTotal={getTotal}
                       getChargeDue={getChargeDue}
-                      containerClass="container1"
+                      containerClass={`container1 ${!isAuthenticated ? "blurred" : ""}`}
                     />
                   )}
                   {/* {show && (
@@ -822,12 +827,20 @@ function App() {
                   containerClass="container"
                 />
               )
-            ) : (
-              <LoginPage
-                setIsAuthenticated={setIsAuthenticated}
-                setUserRole={setUserRole}
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <div className="home-page">
+              <img
+                src={logo}
+                alt="logo"
+                className="home-logo"
+                onClick={() => navigate("/generate")}
+                style={{ cursor: "pointer" }}
               />
-            )
+            </div>
           }
         />
                 <Route

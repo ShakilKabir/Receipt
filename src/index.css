@@ -126,7 +126,7 @@ margin: 32px 0 16px;
   display: flex;
   justify-content: space-between;
   font-size: 20px;
-  margin-bottom: -10px;
+  margin-bottom: -14px;
   margin-left: -6px;
   margin-right: -6px;
   position: relative;
@@ -143,7 +143,7 @@ margin: 32px 0 16px;
   text-align: center;
   /* line-height: 6px; */
   /* line-height: 85%; */
-  margin-top: -14px;
+  margin-top: -12px;
   position: relative;
 }
 
@@ -270,3 +270,40 @@ margin: 32px 0 16px;
 .admin-section form button:hover {
   background-color: #0056b3;
 }
+
+/* src/index.css or src/App.css */
+
+/* src/index.css or src/App.css */
+
+.home-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.home-logo {
+  width: 300px;
+  height: auto;
+  padding: 20px;
+  border: 5px solid #007bff; /* Blue border */
+  border-radius: 10px;
+  background-color: #fff; /* White background */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+  cursor: pointer;
+}
+
+.home-logo:hover {
+  transform: scale(1.05); /* Slightly larger on hover */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Deeper shadow on hover */
+}
+
+.blurred {
+  filter: blur(2px); /* Adjust the blur value as needed */
+  pointer-events: none; /* Prevent interaction */
+  opacity: 0.7; /* Add a slight transparency if desired */
+}
+
+

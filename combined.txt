@@ -797,7 +797,7 @@ function App() {
                       calculateSubtotal={calculateSubtotal}
                       getTotal={getTotal}
                       getChargeDue={getChargeDue}
-                      containerClass="container1"
+                      containerClass={`container1 ${!isAuthenticated ? "blurred" : ""}`}
                     />
                   )}
                   {/* {show && (
@@ -1182,6 +1182,13 @@ margin: 32px 0 16px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Deeper shadow on hover */
 }
 
+.blurred {
+  filter: blur(2px); /* Adjust the blur value as needed */
+  pointer-events: none; /* Prevent interaction */
+  opacity: 0.7; /* Add a slight transparency if desired */
+}
+
+
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -1406,7 +1413,12 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import EmailIcon from "@mui/icons-material/Email";
 import AnnouncementIcon from "@mui/icons-material/Announcement";
 
-function Navbar({ isAuthenticated, setIsAuthenticated, userRole, setUserRole }) {
+function Navbar({
+  isAuthenticated,
+  setIsAuthenticated,
+  userRole,
+  setUserRole,
+}) {
   const navigate = useNavigate();
   const [showContact, setShowContact] = useState(false);
 
@@ -1495,13 +1507,13 @@ function Navbar({ isAuthenticated, setIsAuthenticated, userRole, setUserRole }) 
                   >
                     Mail
                   </Button>
-                  <Button
+                  {/* <Button
                     startIcon={<AnnouncementIcon />}
-                    href="#"  // Replace with your news link
+                    href="#" // Replace with your news link
                     sx={{ justifyContent: "flex-start" }}
                   >
                     News
-                  </Button>
+                  </Button> */}
                 </Box>
               )}
             </Box>
@@ -1510,9 +1522,14 @@ function Navbar({ isAuthenticated, setIsAuthenticated, userRole, setUserRole }) 
             </Button>
           </>
         ) : (
-          <Button color="inherit" onClick={() => navigate("/login")}>
-            Login
-          </Button>
+          <>
+            <Button color="inherit" onClick={() => navigate("/login")}>
+              Login
+            </Button>
+            <Button color="inherit" onClick={() => navigate("/generate")}>
+              Generate
+            </Button>
+          </>
         )}
       </Toolbar>
     </AppBar>
@@ -1723,7 +1740,7 @@ const Receipt = ({
               </div>
             )
           ) : (
-            <Barcode value={formData.barcode} width={3} height={30} fontSize={0} />
+            <Barcode value={formData.barcode} width={3} fontSize={0} />
           )}
           <p className="barcode_lower">
             {formData.dateTimeStatusCode?.substring(0, 4) +

@@ -1,7 +1,19 @@
-// src/pages/AdminPage.js
 import React, { useState } from 'react';
 import axios from '../utils/axiosConfig';
 import { toast } from 'react-toastify';
+import {
+  Container,
+  Grid,
+  Typography,
+  TextField,
+  Button,
+  Paper,
+  Box,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from '@mui/material';
 
 const AdminPage = () => {
   const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '' });
@@ -40,58 +52,95 @@ const AdminPage = () => {
   };
 
   return (
-    <div className="admin-container">
-      <h1>Admin Dashboard</h1>
-      <div className="admin-section">
-        <h2>Change Password</h2>
-        <form onSubmit={handlePasswordSubmit}>
-          <input
-            type="password"
-            name="oldPassword"
-            placeholder="Old Password"
-            value={passwordData.oldPassword}
-            onChange={handlePasswordChange}
-          />
-          <input
-            type="password"
-            name="newPassword"
-            placeholder="New Password"
-            value={passwordData.newPassword}
-            onChange={handlePasswordChange}
-          />
-          <button type="submit">Change Password</button>
-        </form>
-      </div>
+    <Container maxWidth="md">
+      <Typography variant="h4" gutterBottom>
+        Admin Dashboard
+      </Typography>
 
-      <div className="admin-section">
-        <h2>Add New User</h2>
-        <form onSubmit={handleNewUserSubmit}>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={newUserData.username}
-            onChange={handleNewUserChange}
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={newUserData.password}
-            onChange={handleNewUserChange}
-          />
-          <select
-            name="role"
-            value={newUserData.role}
-            onChange={handleNewUserChange}
-          >
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-          </select>
-          <button type="submit">Add User</button>
-        </form>
-      </div>
-    </div>
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3}>
+            <Box p={3}>
+              <Typography variant="h6" gutterBottom>
+                Change Password
+              </Typography>
+              <form onSubmit={handlePasswordSubmit}>
+                <TextField
+                  type="password"
+                  name="oldPassword"
+                  label="Old Password"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  value={passwordData.oldPassword}
+                  onChange={handlePasswordChange}
+                />
+                <TextField
+                  type="password"
+                  name="newPassword"
+                  label="New Password"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordChange}
+                />
+                <Button variant="contained" color="primary" type="submit" fullWidth>
+                  Change Password
+                </Button>
+              </form>
+            </Box>
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3}>
+            <Box p={3}>
+              <Typography variant="h6" gutterBottom>
+                Add New User
+              </Typography>
+              <form onSubmit={handleNewUserSubmit}>
+                <TextField
+                  type="text"
+                  name="username"
+                  label="Username"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  value={newUserData.username}
+                  onChange={handleNewUserChange}
+                />
+                <TextField
+                  type="password"
+                  name="password"
+                  label="Password"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  value={newUserData.password}
+                  onChange={handleNewUserChange}
+                />
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Role</InputLabel>
+                  <Select
+                    name="role"
+                    value={newUserData.role}
+                    onChange={handleNewUserChange}
+                    variant="outlined"
+                  >
+                    <MenuItem value="user">User</MenuItem>
+                    <MenuItem value="admin">Admin</MenuItem>
+                  </Select>
+                </FormControl>
+                <Button variant="contained" color="primary" type="submit" fullWidth>
+                  Add User
+                </Button>
+              </form>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Container>
   );
 };
 

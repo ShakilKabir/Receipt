@@ -125,9 +125,64 @@ function Navbar({
             <Button color="inherit" onClick={() => navigate("/login")}>
               Login
             </Button>
+            <Box
+              sx={{ position: "relative" }}
+              onMouseEnter={() => setShowContact(true)}
+              onMouseLeave={() => setShowContact(false)}
+            >
+              <Button color="inherit">Contact</Button>
+              {showContact && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    bgcolor: "background.paper",
+                    p: 1,
+                    borderRadius: 1,
+                    boxShadow: 3,
+                  }}
+                >
+                  <Button
+                    startIcon={<TelegramIcon />}
+                    href="https://t.me/IDTemaplate"
+                    target="_blank"
+                    sx={{ justifyContent: "flex-start" }}
+                  >
+                    Telegram
+                  </Button>
+                  <Button
+                    startIcon={<WhatsAppIcon />}
+                    href="https://wa.me/+13473435837"
+                    target="_blank"
+                    sx={{ justifyContent: "flex-start" }}
+                  >
+                    WhatsApp
+                  </Button>
+                  <Button
+                    startIcon={<EmailIcon />}
+                    href="mailto:idtemplate.psd@gmail.com"
+                    target="_blank"
+                    sx={{ justifyContent: "flex-start" }}
+                  >
+                    Mail
+                  </Button>
+                  {/* <Button
+                    startIcon={<AnnouncementIcon />}
+                    href="#" // Replace with your news link
+                    sx={{ justifyContent: "flex-start" }}
+                  >
+                    News
+                  </Button> */}
+                </Box>
+              )}
+            </Box>
             <Button color="inherit" onClick={() => navigate("/generate")}>
               Generate
             </Button>
+            
           </>
         )}
       </Toolbar>

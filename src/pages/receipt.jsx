@@ -3,9 +3,9 @@ import Barcode from "react-barcode";
 import logo from "../assets/logo.jpg";
 import { Button, Box } from "@mui/material";
 import { useReactToPrint } from "react-to-print";
-import html2canvas from 'html2canvas';
+import html2canvas from "html2canvas";
 import { useLocation } from "react-router-dom";
-import axios from '../utils/axiosConfig'
+import axios from "../utils/axiosConfig";
 
 const Receipt = ({
   formData,
@@ -23,54 +23,60 @@ const Receipt = ({
   const barcodeRef = useRef(null);
   const location = useLocation();
 
-  const isReceiptPage = location.pathname === '/receipt';
+  const isReceiptPage = location.pathname === "/receipt";
 
   useEffect(() => {
-    if (barcodeRef.current) {
-      const svgElement = barcodeRef.current.querySelector("svg");
-      if (svgElement) {
-        const svgData = new XMLSerializer().serializeToString(svgElement);
-        const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-        const url = URL.createObjectURL(svgBlob);
+    if (barcodeImage) return;
 
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width; 
-          canvas.height = img.height; 
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-          setBarcodeImage(canvas.toDataURL("image/png"));
-          URL.revokeObjectURL(url);
-        };
-        img.src = url;
-      }
+    const handleBarcodeRender = (svg) => {
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const svgBlob = new Blob([svgData], {
+        type: "image/svg+xml;charset=utf-8",
+      });
+      const url = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        setBarcodeImage(canvas.toDataURL("image/png"));
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    };
+
+    // Generate the barcode image only if formData is available
+    if (formData.barcode) {
+      handleBarcodeRender(receiptRef.current.querySelector("svg"));
     }
-  }, [formData.barcode]);
+  }, [formData.barcode, barcodeImage]);
 
   useEffect(() => {
     const saveReceiptAsPngAutomatically = async () => {
       const node = receiptRef.current;
       try {
         const canvas = await html2canvas(node, {
-          backgroundColor: '#fff',
+          backgroundColor: "#fff",
           useCORS: true,
           allowTaint: true,
           scale: 2,
         });
 
         // Convert canvas to data URL
-        const pngData = canvas.toDataURL('image/png');
+        const pngData = canvas.toDataURL("image/png");
 
         // Send the PNG data to the backend
-        const response = await axios.post('/api/receipts/save', {
-          pngData,  // Base64 encoded PNG data
+        const response = await axios.post("/api/receipts/save", {
+          pngData, // Base64 encoded PNG data
           filename: `receipt_${new Date().getTime()}.png`, // Generate a unique filename
         });
 
-        console.log('Receipt saved automatically:', response.data.message);
+        console.log("Receipt saved automatically:", response.data.message);
       } catch (error) {
-        console.error('Error automatically saving the receipt as PNG:', error);
+        console.error("Error automatically saving the receipt as PNG:", error);
       }
     };
 
@@ -82,19 +88,19 @@ const Receipt = ({
   const handleSaveAsPng = () => {
     const node = receiptRef.current;
     html2canvas(node, {
-      backgroundColor: '#fff',
+      backgroundColor: "#fff",
       useCORS: true,
       allowTaint: true,
       scale: 2,
     })
       .then((canvas) => {
-        const link = document.createElement('a');
-        link.download = 'receipt.png';
-        link.href = canvas.toDataURL('image/png');
+        const link = document.createElement("a");
+        link.download = "receipt.png";
+        link.href = canvas.toDataURL("image/png");
         link.click();
       })
       .catch((error) => {
-        console.error('Could not generate image', error);
+        console.error("Could not generate image", error);
       });
   };
 
@@ -193,15 +199,28 @@ const Receipt = ({
               <img
                 src={barcodeImage}
                 alt="Barcode"
-                style={{ display: "block", margin: "0 auto", maxWidth: "100%", height: "auto" }}
+                style={{
+                  display: "block",
+                  margin: "0 auto",
+                  maxWidth: "85%",
+                  height: "auto",
+                }}
               />
             ) : (
-              <div id="barcode" ref={barcodeRef} style={{ display: "flex", justifyContent: "center" }}>
-                <Barcode value={formData.barcode} width={1.5} height={45} fontSize={0} />
-              </div>
+              // <div id="barcode" ref={barcodeRef} style={{ display: "flex", justifyContent: "center" }}>
+              //   <Barcode value={formData.barcode} width={1.5} height={45} fontSize={0} />
+              // </div>
+              <>
+                <Barcode value={formData.barcode} width={3.5} fontSize={0} />
+              </>
             )
           ) : (
-            <Barcode value={formData.barcode} width={3} fontSize={0} />
+            <Barcode
+              value={formData.barcode}
+              width={3.5}
+              // height={50}
+              fontSize={0}
+            />
           )}
           <p className="barcode_lower">
             {formData.dateTimeStatusCode?.substring(0, 4) +
@@ -269,14 +288,16 @@ const Receipt = ({
         )}
       </div>
       {/* Buttons to Save as PNG and Print */}
-      {isReceiptPage && <Box mt={2} display="flex" justifyContent="center" gap={2}>
-        <Button variant="contained" color="primary" onClick={handleSaveAsPng}>
-          Save as PNG
-        </Button>
-        <Button variant="contained" color="secondary" onClick={handlePrint}>
-          Print
-        </Button>
-      </Box>}
+      {isReceiptPage && (
+        <Box mt={2} display="flex" justifyContent="center" gap={2}>
+          <Button variant="contained" color="primary" onClick={handleSaveAsPng}>
+            Save as PNG
+          </Button>
+          <Button variant="contained" color="secondary" onClick={handlePrint}>
+            Print
+          </Button>
+        </Box>
+      )}
     </div>
   );
 };

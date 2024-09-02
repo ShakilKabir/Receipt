@@ -1,4 +1,3 @@
-// src/pages/Login.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -82,6 +81,9 @@ const LoginPage = ({ setIsAuthenticated, setUserRole }) => {
             value={loginData.password}
             onChange={handleChange}
           />
+          <Typography variant="body2" color="black" align="center" mt={2} mb={1}>
+            If you need Receipt Generator full access, please get in touch with us.
+          </Typography>
           <Button
             type="submit"
             fullWidth

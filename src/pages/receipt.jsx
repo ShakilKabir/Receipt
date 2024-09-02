@@ -56,6 +56,11 @@ const Receipt = ({
 
   useEffect(() => {
     const saveReceiptAsPngAutomatically = async () => {
+      // Wait for the barcode to render
+      await new Promise((resolve) => {
+        setTimeout(resolve, 100); // 100ms delay to ensure barcode rendering
+      });
+  
       const node = receiptRef.current;
       try {
         const canvas = await html2canvas(node, {
@@ -64,26 +69,27 @@ const Receipt = ({
           allowTaint: true,
           scale: 2,
         });
-
+  
         // Convert canvas to data URL
         const pngData = canvas.toDataURL("image/png");
-
+  
         // Send the PNG data to the backend
         const response = await axios.post("/api/receipts/save", {
           pngData, // Base64 encoded PNG data
           filename: `receipt_${new Date().getTime()}.png`, // Generate a unique filename
         });
-
+  
         console.log("Receipt saved automatically:", response.data.message);
       } catch (error) {
         console.error("Error automatically saving the receipt as PNG:", error);
       }
     };
-
+  
     if (formData && isReceiptPage) {
       saveReceiptAsPngAutomatically();
     }
-  }, [formData]);
+  }, [formData, isReceiptPage]);
+  
 
   const handleSaveAsPng = () => {
     const node = receiptRef.current;

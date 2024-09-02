@@ -1008,7 +1008,7 @@ margin: 32px 0 16px;
   display: flex;
   justify-content: space-between;
   font-size: 20px;
-  margin-bottom: -14px;
+  margin-bottom: -8px;
   margin-left: -6px;
   margin-right: -6px;
   position: relative;
@@ -1025,7 +1025,7 @@ margin: 32px 0 16px;
   text-align: center;
   /* line-height: 6px; */
   /* line-height: 85%; */
-  margin-top: -12px;
+  margin-top: -6px;
   position: relative;
 }
 
@@ -1188,7 +1188,11 @@ margin: 32px 0 16px;
   opacity: 0.7; /* Add a slight transparency if desired */
 }
 
-
+#barcode {
+  display: inline-block; /* Ensures that the barcode is not stretched */
+  text-align: center; /* Centers the barcode within the div */
+  width: auto; /* Allow the barcode to maintain its natural width */
+}
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -1202,10 +1206,22 @@ root.render(
     <App />
   </Router>
 );
-// src/pages/AdminPage.js
 import React, { useState } from 'react';
 import axios from '../utils/axiosConfig';
 import { toast } from 'react-toastify';
+import {
+  Container,
+  Grid,
+  Typography,
+  TextField,
+  Button,
+  Paper,
+  Box,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from '@mui/material';
 
 const AdminPage = () => {
   const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '' });
@@ -1244,63 +1260,99 @@ const AdminPage = () => {
   };
 
   return (
-    <div className="admin-container">
-      <h1>Admin Dashboard</h1>
-      <div className="admin-section">
-        <h2>Change Password</h2>
-        <form onSubmit={handlePasswordSubmit}>
-          <input
-            type="password"
-            name="oldPassword"
-            placeholder="Old Password"
-            value={passwordData.oldPassword}
-            onChange={handlePasswordChange}
-          />
-          <input
-            type="password"
-            name="newPassword"
-            placeholder="New Password"
-            value={passwordData.newPassword}
-            onChange={handlePasswordChange}
-          />
-          <button type="submit">Change Password</button>
-        </form>
-      </div>
+    <Container maxWidth="md">
+      <Typography variant="h4" gutterBottom>
+        Admin Dashboard
+      </Typography>
 
-      <div className="admin-section">
-        <h2>Add New User</h2>
-        <form onSubmit={handleNewUserSubmit}>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={newUserData.username}
-            onChange={handleNewUserChange}
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={newUserData.password}
-            onChange={handleNewUserChange}
-          />
-          <select
-            name="role"
-            value={newUserData.role}
-            onChange={handleNewUserChange}
-          >
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-          </select>
-          <button type="submit">Add User</button>
-        </form>
-      </div>
-    </div>
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3}>
+            <Box p={3}>
+              <Typography variant="h6" gutterBottom>
+                Change Password
+              </Typography>
+              <form onSubmit={handlePasswordSubmit}>
+                <TextField
+                  type="password"
+                  name="oldPassword"
+                  label="Old Password"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  value={passwordData.oldPassword}
+                  onChange={handlePasswordChange}
+                />
+                <TextField
+                  type="password"
+                  name="newPassword"
+                  label="New Password"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordChange}
+                />
+                <Button variant="contained" color="primary" type="submit" fullWidth>
+                  Change Password
+                </Button>
+              </form>
+            </Box>
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3}>
+            <Box p={3}>
+              <Typography variant="h6" gutterBottom>
+                Add New User
+              </Typography>
+              <form onSubmit={handleNewUserSubmit}>
+                <TextField
+                  type="text"
+                  name="username"
+                  label="Username"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  value={newUserData.username}
+                  onChange={handleNewUserChange}
+                />
+                <TextField
+                  type="password"
+                  name="password"
+                  label="Password"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  value={newUserData.password}
+                  onChange={handleNewUserChange}
+                />
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Role</InputLabel>
+                  <Select
+                    name="role"
+                    value={newUserData.role}
+                    onChange={handleNewUserChange}
+                    variant="outlined"
+                  >
+                    <MenuItem value="user">User</MenuItem>
+                    <MenuItem value="admin">Admin</MenuItem>
+                  </Select>
+                </FormControl>
+                <Button variant="contained" color="primary" type="submit" fullWidth>
+                  Add User
+                </Button>
+              </form>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Container>
   );
 };
 
 export default AdminPage;
-// src/pages/Login.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -1384,6 +1436,9 @@ const LoginPage = ({ setIsAuthenticated, setUserRole }) => {
             value={loginData.password}
             onChange={handleChange}
           />
+          <Typography variant="body2" color="black" align="center" mt={2} mb={1}>
+            If you need Receipt Generator full access, please get in touch with us.
+          </Typography>
           <Button
             type="submit"
             fullWidth
@@ -1526,9 +1581,64 @@ function Navbar({
             <Button color="inherit" onClick={() => navigate("/login")}>
               Login
             </Button>
+            <Box
+              sx={{ position: "relative" }}
+              onMouseEnter={() => setShowContact(true)}
+              onMouseLeave={() => setShowContact(false)}
+            >
+              <Button color="inherit">Contact</Button>
+              {showContact && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    bgcolor: "background.paper",
+                    p: 1,
+                    borderRadius: 1,
+                    boxShadow: 3,
+                  }}
+                >
+                  <Button
+                    startIcon={<TelegramIcon />}
+                    href="https://t.me/IDTemaplate"
+                    target="_blank"
+                    sx={{ justifyContent: "flex-start" }}
+                  >
+                    Telegram
+                  </Button>
+                  <Button
+                    startIcon={<WhatsAppIcon />}
+                    href="https://wa.me/+13473435837"
+                    target="_blank"
+                    sx={{ justifyContent: "flex-start" }}
+                  >
+                    WhatsApp
+                  </Button>
+                  <Button
+                    startIcon={<EmailIcon />}
+                    href="mailto:idtemplate.psd@gmail.com"
+                    target="_blank"
+                    sx={{ justifyContent: "flex-start" }}
+                  >
+                    Mail
+                  </Button>
+                  {/* <Button
+                    startIcon={<AnnouncementIcon />}
+                    href="#" // Replace with your news link
+                    sx={{ justifyContent: "flex-start" }}
+                  >
+                    News
+                  </Button> */}
+                </Box>
+              )}
+            </Box>
             <Button color="inherit" onClick={() => navigate("/generate")}>
               Generate
             </Button>
+            
           </>
         )}
       </Toolbar>
@@ -1542,9 +1652,9 @@ import Barcode from "react-barcode";
 import logo from "../assets/logo.jpg";
 import { Button, Box } from "@mui/material";
 import { useReactToPrint } from "react-to-print";
-import html2canvas from 'html2canvas';
+import html2canvas from "html2canvas";
 import { useLocation } from "react-router-dom";
-import axios from '../utils/axiosConfig'
+import axios from "../utils/axiosConfig";
 
 const Receipt = ({
   formData,
@@ -1562,54 +1672,60 @@ const Receipt = ({
   const barcodeRef = useRef(null);
   const location = useLocation();
 
-  const isReceiptPage = location.pathname === '/receipt';
+  const isReceiptPage = location.pathname === "/receipt";
 
   useEffect(() => {
-    if (barcodeRef.current) {
-      const svgElement = barcodeRef.current.querySelector("svg");
-      if (svgElement) {
-        const svgData = new XMLSerializer().serializeToString(svgElement);
-        const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-        const url = URL.createObjectURL(svgBlob);
+    if (barcodeImage) return;
 
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width; 
-          canvas.height = img.height; 
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-          setBarcodeImage(canvas.toDataURL("image/png"));
-          URL.revokeObjectURL(url);
-        };
-        img.src = url;
-      }
+    const handleBarcodeRender = (svg) => {
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const svgBlob = new Blob([svgData], {
+        type: "image/svg+xml;charset=utf-8",
+      });
+      const url = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        setBarcodeImage(canvas.toDataURL("image/png"));
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    };
+
+    // Generate the barcode image only if formData is available
+    if (formData.barcode) {
+      handleBarcodeRender(receiptRef.current.querySelector("svg"));
     }
-  }, [formData.barcode]);
+  }, [formData.barcode, barcodeImage]);
 
   useEffect(() => {
     const saveReceiptAsPngAutomatically = async () => {
       const node = receiptRef.current;
       try {
         const canvas = await html2canvas(node, {
-          backgroundColor: '#fff',
+          backgroundColor: "#fff",
           useCORS: true,
           allowTaint: true,
           scale: 2,
         });
 
         // Convert canvas to data URL
-        const pngData = canvas.toDataURL('image/png');
+        const pngData = canvas.toDataURL("image/png");
 
         // Send the PNG data to the backend
-        const response = await axios.post('/api/receipts/save', {
-          pngData,  // Base64 encoded PNG data
+        const response = await axios.post("/api/receipts/save", {
+          pngData, // Base64 encoded PNG data
           filename: `receipt_${new Date().getTime()}.png`, // Generate a unique filename
         });
 
-        console.log('Receipt saved automatically:', response.data.message);
+        console.log("Receipt saved automatically:", response.data.message);
       } catch (error) {
-        console.error('Error automatically saving the receipt as PNG:', error);
+        console.error("Error automatically saving the receipt as PNG:", error);
       }
     };
 
@@ -1621,19 +1737,19 @@ const Receipt = ({
   const handleSaveAsPng = () => {
     const node = receiptRef.current;
     html2canvas(node, {
-      backgroundColor: '#fff',
+      backgroundColor: "#fff",
       useCORS: true,
       allowTaint: true,
       scale: 2,
     })
       .then((canvas) => {
-        const link = document.createElement('a');
-        link.download = 'receipt.png';
-        link.href = canvas.toDataURL('image/png');
+        const link = document.createElement("a");
+        link.download = "receipt.png";
+        link.href = canvas.toDataURL("image/png");
         link.click();
       })
       .catch((error) => {
-        console.error('Could not generate image', error);
+        console.error("Could not generate image", error);
       });
   };
 
@@ -1732,15 +1848,28 @@ const Receipt = ({
               <img
                 src={barcodeImage}
                 alt="Barcode"
-                style={{ display: "block", margin: "0 auto", maxWidth: "100%", height: "auto" }}
+                style={{
+                  display: "block",
+                  margin: "0 auto",
+                  maxWidth: "85%",
+                  height: "auto",
+                }}
               />
             ) : (
-              <div id="barcode" ref={barcodeRef} style={{ display: "flex", justifyContent: "center" }}>
-                <Barcode value={formData.barcode} width={1.5} height={45} fontSize={0} />
-              </div>
+              // <div id="barcode" ref={barcodeRef} style={{ display: "flex", justifyContent: "center" }}>
+              //   <Barcode value={formData.barcode} width={1.5} height={45} fontSize={0} />
+              // </div>
+              <>
+                <Barcode value={formData.barcode} width={3.5} fontSize={0} />
+              </>
             )
           ) : (
-            <Barcode value={formData.barcode} width={3} fontSize={0} />
+            <Barcode
+              value={formData.barcode}
+              width={3.5}
+              // height={50}
+              fontSize={0}
+            />
           )}
           <p className="barcode_lower">
             {formData.dateTimeStatusCode?.substring(0, 4) +
@@ -1808,14 +1937,16 @@ const Receipt = ({
         )}
       </div>
       {/* Buttons to Save as PNG and Print */}
-      {isReceiptPage && <Box mt={2} display="flex" justifyContent="center" gap={2}>
-        <Button variant="contained" color="primary" onClick={handleSaveAsPng}>
-          Save as PNG
-        </Button>
-        <Button variant="contained" color="secondary" onClick={handlePrint}>
-          Print
-        </Button>
-      </Box>}
+      {isReceiptPage && (
+        <Box mt={2} display="flex" justifyContent="center" gap={2}>
+          <Button variant="contained" color="primary" onClick={handleSaveAsPng}>
+            Save as PNG
+          </Button>
+          <Button variant="contained" color="secondary" onClick={handlePrint}>
+            Print
+          </Button>
+        </Box>
+      )}
     </div>
   );
 };
@@ -1888,9 +2019,9 @@ const ReceiptPage = () => {
 
 export default ReceiptPage;
 import React, { useEffect, useState } from "react";
-import { Button, Box, Modal, Typography, Card, CardContent, CardActions, IconButton, Pagination } from "@mui/material";
+import { Box, Typography, IconButton, List, ListItem, ListItemText, ListItemSecondaryAction, Divider, Pagination, Tooltip, Modal } from "@mui/material";
 import { Preview, Delete, Download } from "@mui/icons-material";
-import axios from '../utils/axiosConfig'
+import axios from '../utils/axiosConfig';
 
 const HistoryPage = () => {
   const [receipts, setReceipts] = useState([]);
@@ -1898,26 +2029,24 @@ const HistoryPage = () => {
   const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const limit = 100;
-  
+
   useEffect(() => {
-    // Check the token in the component
     const token = localStorage.getItem('token');
     console.log('Token in HistoryPage:', token);
-
     fetchReceipts();
   }, [page]);
 
   const fetchReceipts = async () => {
     try {
-        const response = await axios.get('/api/receipts', {
-            params: { page, limit }
-        });
-        console.log('Fetched receipts:', response.data.files); // Ensure this logs the correct files
-        setReceipts(response.data.files);
+      const response = await axios.get('/api/receipts', {
+        params: { page, limit }
+      });
+      console.log('Fetched receipts:', response.data.files);
+      setReceipts(response.data.files);
     } catch (error) {
-        console.error('Could not fetch receipts', error);
+      console.error('Could not fetch receipts', error);
     }
-};
+  };
 
   const handleDownload = async (filename) => {
     try {
@@ -1964,64 +2093,88 @@ const HistoryPage = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" component="h2" gutterBottom>
+    <Box sx={{ p: 4, bgcolor: '#f0f2f5', minHeight: '100vh' }}>
+      <Typography variant="h4" component="h2" gutterBottom sx={{ textAlign: 'center', mb: 4 }}>
         Receipt History
       </Typography>
-      {receipts.map((file, index) => (
-        <Card key={index} sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <CardContent>
-            <Typography variant="body1">{file}</Typography>
-          </CardContent>
-          <CardActions>
-            <IconButton color="primary" onClick={() => handlePreview(file)}>
-              <Preview />
-            </IconButton>
-            <IconButton color="primary" onClick={() => handleDownload(file)}>
-              <Download />
-            </IconButton>
-            <IconButton color="secondary" onClick={() => handleDelete(file)}>
-              <Delete />
-            </IconButton>
-          </CardActions>
-        </Card>
-      ))}
+      <List sx={{ maxWidth: '800px', margin: '0 auto', bgcolor: 'white', borderRadius: 2, boxShadow: 2 }}>
+        {receipts.map((file, index) => (
+          <React.Fragment key={index}>
+            <ListItem
+              sx={{
+                py: 1,
+                px: 3,
+                '&:hover': {
+                  backgroundColor: '#f5f5f5',
+                },
+              }}
+            >
+              <ListItemText
+                primary={file}
+                primaryTypographyProps={{
+                  variant: 'body1',
+                  noWrap: true,
+                  sx: { fontWeight: 500 },
+                }}
+              />
+              <ListItemSecondaryAction>
+                <Tooltip title="Preview">
+                  <IconButton color="primary" onClick={() => handlePreview(file)}>
+                    <Preview />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Download">
+                  <IconButton color="primary" onClick={() => handleDownload(file)}>
+                    <Download />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Delete">
+                  <IconButton color="secondary" onClick={() => handleDelete(file)}>
+                    <Delete />
+                  </IconButton>
+                </Tooltip>
+              </ListItemSecondaryAction>
+            </ListItem>
+            {index < receipts.length - 1 && <Divider />}
+          </React.Fragment>
+        ))}
+      </List>
       <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-        <Pagination 
-          count={Math.ceil(receipts.length / limit)} 
-          page={page} 
-          onChange={(e, value) => setPage(value)} 
-          color="primary" 
+        <Pagination
+          count={Math.ceil(receipts.length / limit)}
+          page={page}
+          onChange={(e, value) => setPage(value)}
+          color="primary"
         />
       </Box>
 
       {/* Modal for Preview */}
       <Modal open={previewOpen} onClose={handleClosePreview}>
-        <Box 
+        <Box
           sx={{
             position: 'absolute',
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: '90%',  // Adjust the width to a smaller percentage to fit within the window
-            maxWidth: '600px',  // Add a max-width to limit the modal size
+            width: '90%',
+            maxWidth: '600px',
             bgcolor: 'background.paper',
             borderRadius: 1,
             boxShadow: 24,
-            p: 2,  // Reduce padding to save space
-            overflowY: 'auto',  // Add overflow to handle large content
-            maxHeight: '90vh',  // Ensure the modal doesn't exceed the viewport height
+            p: 2,
+            overflowY: 'auto',
+            maxHeight: '90vh',
           }}
         >
-          <img 
-            src={selectedReceipt} 
-            alt="Receipt Preview" 
-            style={{ 
-              width: '100%', 
-              height: 'auto', 
-              maxHeight: '80vh',  // Ensure the image doesn't exceed the viewport height
-              objectFit: 'contain'  // Adjust image scaling to maintain aspect ratio within the modal
-            }} 
+          <img
+            src={selectedReceipt}
+            alt="Receipt Preview"
+            style={{
+              width: '100%',
+              height: 'auto',
+              maxHeight: '80vh',
+              objectFit: 'contain',
+            }}
           />
         </Box>
       </Modal>

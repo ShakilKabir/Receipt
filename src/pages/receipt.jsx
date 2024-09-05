@@ -55,6 +55,8 @@ const Receipt = ({
   }, [formData.barcode, barcodeImage]);
 
   useEffect(() => {
+    const isReceiptSubmitted = sessionStorage.getItem("receiptSubmitted");
+
     const saveReceiptAsPngAutomatically = async () => {
       // Wait for the barcode to render
       await new Promise((resolve) => {
@@ -73,11 +75,14 @@ const Receipt = ({
         // Convert canvas to data URL
         const pngData = canvas.toDataURL("image/png");
   
+        const dateTimeStatusCode = formData.dateTimeStatusCode || "defaultCode";
+        const receiptName = `home-depot-receipt-${dateTimeStatusCode}`; // No version here
+  
         // Send the PNG data to the backend
         const response = await axios.post("/api/receipts/save", {
           pngData, // Base64 encoded PNG data
-          filename: `receipt_${new Date().getTime()}.png`, // Generate a unique filename
-        });
+          filename: receiptName, // Send filename without version
+        });  
   
         console.log("Receipt saved automatically:", response.data.message);
       } catch (error) {
@@ -85,8 +90,9 @@ const Receipt = ({
       }
     };
   
-    if (formData && isReceiptPage) {
+    if (formData && isReceiptPage && isReceiptSubmitted) {
       saveReceiptAsPngAutomatically();
+      sessionStorage.removeItem("receiptSubmitted");
     }
   }, [formData, isReceiptPage]);
   

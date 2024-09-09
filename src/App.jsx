@@ -398,13 +398,25 @@ function App() {
 
     await saveProductReferences(formData.products);
 
-    navigate("/receipt", {
-      state: {
-        formData,
-        time12,
-        ampm,
-      },
-    });
+    // navigate("/receipt", {
+    //   state: {
+    //     formData,
+    //     time12,
+    //     ampm,
+    //   },
+    // });
+
+    const receiptWindow = window.open("/receipt", "_blank");
+    if (receiptWindow) {
+      receiptWindow.sessionStorage.setItem(
+        "receiptData",
+        JSON.stringify({
+          formData,
+          time12,
+          ampm,
+        })
+      );
+    }
 
     setFormData({
       address: "",

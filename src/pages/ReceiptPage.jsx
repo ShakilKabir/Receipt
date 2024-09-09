@@ -1,12 +1,23 @@
-import React from "react";
-import { useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import Receipt from "./receipt";
 
 const ReceiptPage = () => {
-  const location = useLocation();
-  const formData = location.state?.formData;
-  const time12 = location.state?.time12;
-  const ampm = location.state?.ampm;
+  const [formData, setFormData] = useState(null);
+  const [time12, setTime12] = useState("");
+  const [ampm, setAmpm] = useState("");
+
+  useEffect(() => {
+    // Retrieve the receipt data from sessionStorage
+    const receiptData = sessionStorage.getItem("receiptData");
+    if (receiptData) {
+      const parsedData = JSON.parse(receiptData);
+      setFormData(parsedData.formData);
+      setTime12(parsedData.time12);
+      setAmpm(parsedData.ampm);
+    } else {
+      console.error("No receipt data found in sessionStorage");
+    }
+  }, []);
 
   // Define necessary functions in this component
   const formatDate = (dateStr) => {

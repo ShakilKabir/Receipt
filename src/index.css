@@ -311,3 +311,29 @@ margin: 32px 0 16px;
   text-align: center; /* Centers the barcode within the div */
   width: auto; /* Allow the barcode to maintain its natural width */
 }
+
+.suggestion-list {
+  position: absolute;
+  z-index: 1000; /* Ensure it's on top */
+  background: white;
+  border: 1px solid #ccc;
+  width: 100%; /* Match the input field width */
+  max-height: 150px;
+  overflow-y: auto; /* Scroll if there are too many items */
+  list-style-type: none;
+  padding: 0;
+  margin: 0; /* Remove any default margin */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Add a shadow for visibility */
+  top: 100%; /* Position dropdown below the input */
+  left: 0; /* Align dropdown with the left edge of the input */
+}
+
+.suggestion-list li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.suggestion-list li:hover {
+  background-color: #f0f0f0;
+}
+

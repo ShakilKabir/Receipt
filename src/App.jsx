@@ -4,7 +4,7 @@ import {
   Routes,
   useNavigate,
 } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import logo from "./assets/logo.jpg";
 // import barcode from "./assets/barcode.png";
 import { ToastContainer, toast } from "react-toastify";
@@ -16,6 +16,7 @@ import AdminPage from "./pages/Admin";
 import ReceiptPage from "./pages/ReceiptPage";
 import HistoryPage from "./pages/History";
 import { jwtDecode } from "jwt-decode";
+import axios from "./utils/axiosConfig";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -57,6 +58,70 @@ function App() {
   });
 
   const [errors, setErrors] = useState({});
+  const [suggestions, setSuggestions] = useState({});
+  const productInputRefs = useRef([]);
+
+  const fetchProductReferences = async (query, index, type) => {
+    const endpoint = {
+      productId: "/api/productReferences",
+      productName: "/api/productNames",
+      productDescription2: "/api/productDescription2s",
+    }[type]; // Use the type to determine which endpoint to use
+
+    try {
+      const response = await axios.get(`${endpoint}?query=${query}`);
+      if (Array.isArray(response.data)) {
+        setSuggestions((prevSuggestions) => ({
+          ...prevSuggestions,
+          [`${type}_${index}`]: response.data.slice(0, 4),
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching references:", error);
+    }
+  };
+
+  const handleClickOutside = (event) => {
+    // Log if the click happened inside the suggestion list
+    console.log(
+      "Clicked inside suggestion list?",
+      event.target.closest(".suggestion-list")
+    );
+
+    // Check if any input field or suggestion list is clicked
+    const isClickInsideInputOrSuggestion =
+      productInputRefs.current.some((ref) => ref?.contains(event.target)) ||
+      event.target.closest(".suggestion-list");
+
+    // If the click is outside the inputs or suggestion lists, hide the suggestions
+    if (!isClickInsideInputOrSuggestion) {
+      setSuggestions({}); // Hide suggestions
+    }
+  };
+
+  const handleSuggestionClick = (index, suggestion, type) => {
+    const updatedProducts = formData.products.map((product, i) =>
+      i === index ? { ...product, [type]: suggestion } : product
+    );
+
+    setFormData({
+      ...formData,
+      products: updatedProducts,
+    });
+
+    // Clear the suggestions for this input after selection
+    setSuggestions((prevSuggestions) => ({
+      ...prevSuggestions,
+      [`${type}_${index}`]: [],
+    }));
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     updateBarcode();
@@ -92,11 +157,11 @@ function App() {
     const { name, value } = e.target;
     const products = [...formData.products];
     products[index] = { ...products[index], [name]: value };
-    setFormData({
-      ...formData,
-      products,
-    });
-    validateProductField(index, name, value);
+    setFormData({ ...formData, products });
+
+    if (["productId", "productName", "productDescription2"].includes(name)) {
+      fetchProductReferences(value, index, name);
+    }
   };
 
   const addProduct = () => {
@@ -247,7 +312,34 @@ function App() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const saveProductReferences = async (products) => {
+    try {
+      for (const product of products) {
+        // Save productId
+        await axios.post("/api/productReferences", {
+          productId: product.productId,
+        });
+
+        // Save productName
+        await axios.post("/api/productNames", {
+          productName: product.productName,
+        });
+
+        // Save productDescription2
+        await axios.post("/api/productDescription2s", {
+          productDescription2: product.productDescription2,
+        });
+      }
+    } catch (error) {
+      console.error("Error saving product reference:", error);
+    }
+  };
+
+  useEffect(() => {
+    console.log("Updated suggestions:", suggestions);
+  }, [suggestions]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!isAuthenticated) {
@@ -303,6 +395,8 @@ function App() {
 
     // Set a flag in sessionStorage to indicate the form was submitted
     sessionStorage.setItem("receiptSubmitted", "true");
+
+    await saveProductReferences(formData.products);
 
     navigate("/receipt", {
       state: {
@@ -472,15 +566,47 @@ function App() {
                     <div className="products">
                       {formData.products.map((product, index) => (
                         <div key={index} className="product">
-                          <div className="productInputDivide">
+                          <div
+                            className="productInputDivide"
+                            style={{ position: "relative", width: "100%" }}
+                          >
                             <input
+                              ref={(el) =>
+                                (productInputRefs.current[index] = el)
+                              }
                               type="text"
                               name="productId"
                               placeholder="Product ID"
                               value={product.productId}
                               onChange={(e) => handleProductChange(index, e)}
                               required
+                              style={{ width: "100%" }} // Ensure input and dropdown match widths
                             />
+
+                            {/* Render suggestions only when available */}
+                            {suggestions[`productId_${index}`]?.length > 0 && (
+                              <ul
+                                className="suggestion-list"
+                                style={{ top: "100%" }}
+                              >
+                                {suggestions[`productId_${index}`].map(
+                                  (suggestion, idx) => (
+                                    <li
+                                      key={idx}
+                                      onClick={() =>
+                                        handleSuggestionClick(
+                                          index,
+                                          suggestion,
+                                          "productId"
+                                        )
+                                      }
+                                    >
+                                      {suggestion}
+                                    </li>
+                                  )
+                                )}
+                              </ul>
+                            )}
                             {errors[`productId_${index}`] && (
                               <p style={{ color: "red" }}>
                                 {errors[`productId_${index}`]}
@@ -495,26 +621,95 @@ function App() {
                               required
                             />
                           </div>
-                          <div>
+                          <div style={{ position: "relative", width: "100%" }}>
                             <input
                               type="text"
-                              style={{ marginTop: "4px" }}
+                              style={{
+                                marginTop: "4px"
+                              }}
                               name="productName"
                               placeholder="Product Description Line 1 with <A>"
                               value={product.productName}
                               onChange={(e) => handleProductChange(index, e)}
                               required
                             />
+                            {console.log(
+                              "Suggestions for productName:",
+                              suggestions[`productName_${index}`]
+                            )}
+                            {/* Product Name Suggestions */}
+                            {suggestions[`productName_${index}`]?.length >
+                              0 && (
+                              <>
+                                {console.log(
+                                  "Rendering suggestions for productName:",
+                                  suggestions[`productName_${index}`]
+                                )}
+                                <ul
+                                  className="suggestion-list"
+                                  style={{ top: "100%" }}
+                                >
+                                  {suggestions[`productName_${index}`].map(
+                                    (suggestion, idx) => (
+                                      <li
+                                        key={idx}
+                                        onClick={() =>
+                                          handleSuggestionClick(
+                                            index,
+                                            suggestion,
+                                            "productName"
+                                          )
+                                        }
+                                      >
+                                        {suggestion}
+                                      </li>
+                                    )
+                                  )}
+                                </ul>
+                              </>
+                            )}
                           </div>
-                          <div className="productInputDivide">
+                          <div className="productInputDivide" style={{ position: "relative", width: "100%" }}>
                             <input
                               type="text"
-                              style={{ marginTop: "4px" }}
+                              style={{
+                                marginTop: "4px",
+                                position: "relative",
+                                width: "100%",
+                              }}
                               name="productDescription2"
                               placeholder="Line 2"
                               value={product.productDescription2}
                               onChange={(e) => handleProductChange(index, e)}
                             />
+                            {/* {console.log(
+                              "Suggestions for productDescription2:",
+                              suggestions[`productDescription2_${index}`]
+                            )} */}
+                            {suggestions[`productDescription2_${index}`]
+                              ?.length > 0 && (
+                              <ul
+                                className="suggestion-list"
+                                style={{ top: "100%" }}
+                              >
+                                {suggestions[
+                                  `productDescription2_${index}`
+                                ].map((suggestion, idx) => (
+                                  <li
+                                    key={idx}
+                                    onClick={() =>
+                                      handleSuggestionClick(
+                                        index,
+                                        suggestion,
+                                        "productDescription2"
+                                      )
+                                    }
+                                  >
+                                    {suggestion}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
                             <div
                               style={{
                                 marginTop: "4px",

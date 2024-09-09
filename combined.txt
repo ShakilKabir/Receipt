@@ -2,9 +2,9 @@ import {
   BrowserRouter as Router,
   Route,
   Routes,
-  useNavigate
+  useNavigate,
 } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import logo from "./assets/logo.jpg";
 // import barcode from "./assets/barcode.png";
 import { ToastContainer, toast } from "react-toastify";
@@ -16,6 +16,7 @@ import AdminPage from "./pages/Admin";
 import ReceiptPage from "./pages/ReceiptPage";
 import HistoryPage from "./pages/History";
 import { jwtDecode } from "jwt-decode";
+import axios from "./utils/axiosConfig";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -57,12 +58,77 @@ function App() {
   });
 
   const [errors, setErrors] = useState({});
+  const [suggestions, setSuggestions] = useState({});
+  const productInputRefs = useRef([]);
+
+  const fetchProductReferences = async (query, index) => {
+    try {
+      const response = await axios.get(`/api/productReferences?query=${query}`);
+      console.log("Response from API:", response.data);
+
+      if (Array.isArray(response.data)) {
+        // Update suggestions for the specific product
+        setSuggestions((prevSuggestions) => ({
+          ...prevSuggestions,
+          [index]: response.data.slice(0, 4),
+        }));
+      } else {
+        console.warn("Unexpected response format:", response.data);
+        setSuggestions((prevSuggestions) => ({
+          ...prevSuggestions,
+          [index]: [],
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching product references:", error);
+      setSuggestions((prevSuggestions) => ({
+        ...prevSuggestions,
+        [index]: [],
+      }));
+    }
+  };
+
+  const handleClickOutside = (event) => {
+    // Check if any input field or suggestion list is the target, if not, hide suggestions
+    const clickedOutside =
+      !productInputRefs.current.some((ref) => ref?.contains(event.target)) &&
+      !event.target.closest(".suggestion-list"); // Add this condition to avoid closing on clicking suggestions
+
+    if (clickedOutside) {
+      setSuggestions({}); // Hide all suggestions only if clicked outside
+    }
+  };
+
+  const handleSuggestionClick = (index, suggestion) => {
+    // Update the specific product with the selected suggestion
+    const updatedProducts = formData.products.map((product, i) =>
+      i === index ? { ...product, productId: suggestion } : product
+    );
+
+    setFormData({
+      ...formData,
+      products: updatedProducts,
+    });
+
+    // Clear the suggestions for this input after selection
+    setSuggestions((prevSuggestions) => ({
+      ...prevSuggestions,
+      [index]: [],
+    }));
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     updateBarcode();
   }, [formData.dateTimeStatusCode, formData.date]);
 
-    useEffect(() => {
+  useEffect(() => {
     // Check if the token exists in localStorage
     const token = localStorage.getItem("token");
     if (token) {
@@ -79,7 +145,6 @@ function App() {
     }
   }, []);
 
-
   const handleChange = (e) => {
     const { name, type, value, checked } = e.target;
     setFormData({
@@ -93,11 +158,12 @@ function App() {
     const { name, value } = e.target;
     const products = [...formData.products];
     products[index] = { ...products[index], [name]: value };
-    setFormData({
-      ...formData,
-      products,
-    });
-    validateProductField(index, name, value);
+    setFormData({ ...formData, products });
+
+    if (name === "productId") {
+      console.log(`Fetching suggestions for: ${value}`);
+      fetchProductReferences(value, index); // Pass index for specific product
+    }
   };
 
   const addProduct = () => {
@@ -248,14 +314,30 @@ function App() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const saveProductReferences = async (products) => {
+    try {
+      for (const product of products) {
+        await axios.post("/api/productReferences", {
+          productId: product.productId,
+        });
+      }
+    } catch (error) {
+      console.error("Error saving product reference:", error);
+    }
+  };
+
+  useEffect(() => {
+    console.log("Updated suggestions:", suggestions);
+  }, [suggestions]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!isAuthenticated) {
       toast.error("You must be logged in to submit the form.");
       navigate("/login");
       return;
-    }  
+    }
 
     validateField("dateTimeStatusCode", formData.dateTimeStatusCode);
     validateField("barcode", formData.barcode);
@@ -302,12 +384,17 @@ function App() {
       }
     }
 
-    navigate('/receipt', { 
-      state: { 
-        formData, 
-        time12, 
-        ampm
-      }
+    // Set a flag in sessionStorage to indicate the form was submitted
+    sessionStorage.setItem("receiptSubmitted", "true");
+
+    await saveProductReferences(formData.products);
+
+    navigate("/receipt", {
+      state: {
+        formData,
+        time12,
+        ampm,
+      },
     });
 
     setFormData({
@@ -341,7 +428,7 @@ function App() {
         },
       ],
     });
-    
+
     // setShow(true);
     toast.success("Successfully receipt generated!");
   };
@@ -367,178 +454,202 @@ function App() {
         <Route
           path="/generate"
           element={
-              !show ? (
-                <>
-                  <form onSubmit={handleSubmit}>
-                    <div
-                      className="input_container"
-                      style={{ marginBottom: "10px" }}
-                    >
-                      <div className="logo_container">
-                        <img className="logo" src={logo} alt="logo" />
+            !show ? (
+              <>
+                <form onSubmit={handleSubmit}>
+                  <div
+                    className="input_container"
+                    style={{ marginBottom: "10px" }}
+                  >
+                    <div className="logo_container">
+                      <img className="logo" src={logo} alt="logo" />
+                    </div>
+                    <div className="address_name">
+                      <div className="address">
+                        <input
+                          type="text"
+                          name="address"
+                          placeholder="Address"
+                          value={formData.address}
+                          onChange={handleChange}
+                          required
+                        />
                       </div>
-                      <div className="address_name">
-                        <div className="address">
+                      <div className="name_code">
+                        <div className="name">
+                          {/* <span>STORE MGR.</span>{" "} */}
                           <input
                             type="text"
-                            name="address"
-                            placeholder="Address"
-                            value={formData.address}
+                            name="managerName"
+                            placeholder="STORE MGR."
+                            value={formData.managerName}
                             onChange={handleChange}
                             required
                           />
                         </div>
-                        <div className="name_code">
-                          <div className="name">
-                            {/* <span>STORE MGR.</span>{" "} */}
-                            <input
-                              type="text"
-                              name="managerName"
-                              placeholder="STORE MGR."
-                              value={formData.managerName}
-                              onChange={handleChange}
-                              required
-                            />
-                          </div>
-                          <div className="code">
-                            <input
-                              type="number"
-                              name="managerCode"
-                              placeholder="Mobile No."
-                              value={formData.managerCode}
-                              onChange={handleChange}
-                              required
-                            />
-                            {errors.managerCode && (
-                              <p style={{ color: "red" }}>
-                                {errors.managerCode}
-                              </p>
-                            )}
-                          </div>
+                        <div className="code">
+                          <input
+                            type="number"
+                            name="managerCode"
+                            placeholder="Mobile No."
+                            value={formData.managerCode}
+                            onChange={handleChange}
+                            required
+                          />
+                          {errors.managerCode && (
+                            <p style={{ color: "red" }}>{errors.managerCode}</p>
+                          )}
                         </div>
                       </div>
+                    </div>
 
-                      <div className="date_time_status" style={{ gap: "4px" }}>
+                    <div className="date_time_status" style={{ gap: "4px" }}>
+                      <div>
                         <div>
-                          <div>
+                          <input
+                            type="text"
+                            name="dateTimeStatusCode"
+                            placeholder="25025678989295"
+                            value={formData.dateTimeStatusCode}
+                            onChange={handleChange}
+                            required
+                          />
+                          {errors.dateTimeStatusCode && (
+                            <p style={{ color: "red" }}>
+                              {errors.dateTimeStatusCode}
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <input
+                            type="text"
+                            style={{ marginTop: "4px" }}
+                            name="dateTimeStatusType"
+                            placeholder="SALE SELF CHECK OUT"
+                            value={formData.dateTimeStatusType}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="date_time">
+                        <div>
+                          <input
+                            type="date"
+                            name="date"
+                            value={formData.date}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <input
+                            type="time"
+                            name="time"
+                            value={formData.time}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="products">
+                      {formData.products.map((product, index) => (
+                        <div key={index} className="product">
+                          <div
+                            className="productInputDivide"
+                            style={{ position: "relative", width: "100%" }}
+                          >
                             <input
+                              ref={(el) =>
+                                (productInputRefs.current[index] = el)
+                              }
                               type="text"
-                              name="dateTimeStatusCode"
-                              placeholder="25025678989295"
-                              value={formData.dateTimeStatusCode}
-                              onChange={handleChange}
+                              name="productId"
+                              placeholder="Product ID"
+                              value={product.productId}
+                              onChange={(e) => handleProductChange(index, e)}
                               required
+                              style={{ width: "100%" }} // Ensure input and dropdown match widths
                             />
-                            {errors.dateTimeStatusCode && (
+
+                            {/* Render suggestions only when available */}
+                            {suggestions[index]?.length > 0 && (
+                              <ul
+                                className="suggestion-list"
+                                style={{ top: "100%" }}
+                              >
+                                {suggestions[index].map((suggestion, idx) => (
+                                  <li
+                                    key={idx}
+                                    onClick={() =>
+                                      handleSuggestionClick(index, suggestion)
+                                    } // Call the handler
+                                  >
+                                    {suggestion}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                            {errors[`productId_${index}`] && (
                               <p style={{ color: "red" }}>
-                                {errors.dateTimeStatusCode}
+                                {errors[`productId_${index}`]}
                               </p>
                             )}
+                            <input
+                              type="number"
+                              name="productPrice"
+                              placeholder="Product Price"
+                              value={product.productPrice}
+                              onChange={(e) => handleProductChange(index, e)}
+                              required
+                            />
                           </div>
                           <div>
                             <input
                               type="text"
                               style={{ marginTop: "4px" }}
-                              name="dateTimeStatusType"
-                              placeholder="SALE SELF CHECK OUT"
-                              value={formData.dateTimeStatusType}
-                              onChange={handleChange}
+                              name="productName"
+                              placeholder="Product Description Line 1 with <A>"
+                              value={product.productName}
+                              onChange={(e) => handleProductChange(index, e)}
                               required
                             />
                           </div>
-                        </div>
-                        <div className="date_time">
-                          <div>
+                          <div className="productInputDivide">
                             <input
-                              type="date"
-                              name="date"
-                              value={formData.date}
-                              onChange={handleChange}
-                              required
+                              type="text"
+                              style={{ marginTop: "4px" }}
+                              name="productDescription2"
+                              placeholder="Line 2"
+                              value={product.productDescription2}
+                              onChange={(e) => handleProductChange(index, e)}
                             />
-                          </div>
-                          <div>
-                            <input
-                              type="time"
-                              name="time"
-                              value={formData.time}
-                              onChange={handleChange}
-                              required
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="products">
-                        {formData.products.map((product, index) => (
-                          <div key={index} className="product">
-                            <div className="productInputDivide">
-                              <input
-                                type="text"
-                                name="productId"
-                                placeholder="Product ID"
-                                value={product.productId}
-                                onChange={(e) => handleProductChange(index, e)}
-                                required
-                              />
-                              {errors[`productId_${index}`] && (
-                                <p style={{ color: "red" }}>
-                                  {errors[`productId_${index}`]}
-                                </p>
-                              )}
-                              <input
-                                type="number"
-                                name="productPrice"
-                                placeholder="Product Price"
-                                value={product.productPrice}
-                                onChange={(e) => handleProductChange(index, e)}
-                                required
-                              />
-                            </div>
-                            <div>
-                              <input
-                                type="text"
-                                style={{ marginTop: "4px" }}
-                                name="productName"
-                                placeholder="Product Description Line 1 with <A>"
-                                value={product.productName}
-                                onChange={(e) => handleProductChange(index, e)}
-                                required
-                              />
-                            </div>
-                            <div className="productInputDivide">
-                              <input
-                                type="text"
-                                style={{ marginTop: "4px" }}
-                                name="productDescription2"
-                                placeholder="Line 2"
-                                value={product.productDescription2}
-                                onChange={(e) => handleProductChange(index, e)}
-                              />
-                              <div
-                                style={{
-                                  marginTop: "4px",
-                                  display: "flex",
-                                  height: "35px",
-                                  gap: "8px",
-                                }}
+                            <div
+                              style={{
+                                marginTop: "4px",
+                                display: "flex",
+                                height: "35px",
+                                gap: "8px",
+                              }}
+                            >
+                              <button
+                                style={{ width: "40px" }}
+                                type="button"
+                                onClick={() => removeProduct(index)}
                               >
-                                <button
-                                  style={{ width: "40px" }}
-                                  type="button"
-                                  onClick={() => removeProduct(index)}
-                                >
-                                  -
-                                </button>
-                                <button
-                                  style={{ width: "40px" }}
-                                  type="button"
-                                  onClick={addProduct}
-                                >
-                                  +
-                                </button>
-                              </div>
-                              {/* <input
+                                -
+                              </button>
+                              <button
+                                style={{ width: "40px" }}
+                                type="button"
+                                onClick={addProduct}
+                              >
+                                +
+                              </button>
+                            </div>
+                            {/* <input
                       type="text"
                       style={{ marginTop: "4px" }}
                       name="productDescription3"
@@ -546,8 +657,8 @@ function App() {
                       value={product.productDescription3}
                       onChange={(e) => handleProductChange(index, e)}
                     /> */}
-                            </div>
-                            {/* <div className="productInputDivide">
+                          </div>
+                          {/* <div className="productInputDivide">
                     <input
                       type="text"
                       style={{ marginTop: "4px" }}
@@ -565,7 +676,7 @@ function App() {
                       onChange={(e) => handleProductChange(index, e)}
                     />
                   </div> */}
-                            {/* <div className="productInputDivide">
+                          {/* <div className="productInputDivide">
                     <input
                       type="text"
                       style={{ marginTop: "4px" }}
@@ -576,63 +687,63 @@ function App() {
                     />
                     
                   </div> */}
-                            <hr style={{ margin: "8px 0" }} />
-                          </div>
-                        ))}
-                      </div>
+                          <hr style={{ margin: "8px 0" }} />
+                        </div>
+                      ))}
+                    </div>
 
-                      <div className="calculation" style={{ gap: "4px" }}>
-                        <div className="subtotal">
-                          <p>SUBTOTAL</p>
-                          <p>{calculateSubtotal()}</p>
-                        </div>
-                        <div className="sales_tax">
-                          <p>SALES TAX:</p>
-                          <div>
-                            <input
-                              type="number"
-                              name="tax"
-                              placeholder="Tax"
-                              value={formData.tax}
-                              onChange={handleChange}
-                              required
-                            />
-                          </div>
-                        </div>
-                        <div className="total">
-                          <p>TOTAL</p>
-                          <p>${getTotal()}</p>
-                        </div>
-                        <div className="cash">
-                          <p>CASH</p>
-                          <div>
-                            <input
-                              type="number"
-                              name="cashAmount"
-                              placeholder="Cash Amount"
-                              value={formData.cashAmount}
-                              onChange={handleChange}
-                              required
-                            />
-                          </div>
-                        </div>
-                        <div className="charge_due">
-                          <p>CHANGE DUE</p>
-                          <p>{getChargeDue()}</p>
+                    <div className="calculation" style={{ gap: "4px" }}>
+                      <div className="subtotal">
+                        <p>SUBTOTAL</p>
+                        <p>{calculateSubtotal()}</p>
+                      </div>
+                      <div className="sales_tax">
+                        <p>SALES TAX:</p>
+                        <div>
+                          <input
+                            type="number"
+                            name="tax"
+                            placeholder="Tax"
+                            value={formData.tax}
+                            onChange={handleChange}
+                            required
+                          />
                         </div>
                       </div>
+                      <div className="total">
+                        <p>TOTAL</p>
+                        <p>${getTotal()}</p>
+                      </div>
+                      <div className="cash">
+                        <p>CASH</p>
+                        <div>
+                          <input
+                            type="number"
+                            name="cashAmount"
+                            placeholder="Cash Amount"
+                            value={formData.cashAmount}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="charge_due">
+                        <p>CHANGE DUE</p>
+                        <p>{getChargeDue()}</p>
+                      </div>
+                    </div>
 
-                      <div className="barcode">
-                        <p className="barcode_time_date">
-                          <span>
-                            {formData.dateTimeStatusCode?.substring(0, 4)}
-                          </span>
-                          <span>{formatDate(formData.date)}</span>
-                          <span>{time12}</span>
-                          <span>{ampm}</span>
-                        </p>
-                        {/* <img className="barcode_image" src={barcode} alt="logo" /> */}
-                        {/* <input
+                    <div className="barcode">
+                      <p className="barcode_time_date">
+                        <span>
+                          {formData.dateTimeStatusCode?.substring(0, 4)}
+                        </span>
+                        <span>{formatDate(formData.date)}</span>
+                        <span>{time12}</span>
+                        <span>{ampm}</span>
+                      </p>
+                      {/* <img className="barcode_image" src={barcode} alt="logo" /> */}
+                      {/* <input
                 type="text"
                 name="barcode"
                 placeholder="Barcode"
@@ -643,181 +754,183 @@ function App() {
               {errors.barcode && (
                 <p style={{ color: "red" }}>{errors.barcode}</p>
               )} */}
-                        {formData.barcode && (
-                          <Barcode
-                            value={formData.barcode}
-                            width={3.5}
-                            fontSize={0}
-                          />
-                        )}
-                        <div style={{ textAlign: "right" }}>
+                      {formData.barcode && (
+                        <Barcode
+                          value={formData.barcode}
+                          width={3.5}
+                          fontSize={0}
+                        />
+                      )}
+                      <div style={{ textAlign: "right" }}>
+                        <input
+                          type="text"
+                          name="barcodeFour"
+                          placeholder="Barcode Four Digit"
+                          value={formData.barcodeFour}
+                          onChange={handleChange}
+                          style={{ marginTop: "4px", width: "140px" }}
+                          required
+                        />
+                      </div>
+                      {errors.barcodeFour && (
+                        <p style={{ color: "red" }}>{errors.barcodeFour}</p>
+                      )}
+                      {/* <p className="barcode_lower">2502 51 89295 05/04/2024 4300</p> */}
+                    </div>
+
+                    <div className="return_policy">
+                      <p className="title">RETURN POLICY DEFINITIONS</p>
+                      <div className="expire" style={{ gap: "4px" }}>
+                        <div>
+                          <p>POLICY ID</p>
                           <input
                             type="text"
-                            name="barcodeFour"
-                            placeholder="Barcode Four Digit"
-                            value={formData.barcodeFour}
+                            name="policyId"
+                            placeholder="Policy ID"
+                            value={formData.policyId}
                             onChange={handleChange}
-                            style={{ marginTop: "4px", width: "140px" }}
                             required
                           />
                         </div>
-                        {errors.barcodeFour && (
-                          <p style={{ color: "red" }}>{errors.barcodeFour}</p>
-                        )}
-                        {/* <p className="barcode_lower">2502 51 89295 05/04/2024 4300</p> */}
-                      </div>
-
-                      <div className="return_policy">
-                        <p className="title">RETURN POLICY DEFINITIONS</p>
-                        <div className="expire" style={{ gap: "4px" }}>
-                          <div>
-                            <p>POLICY ID</p>
-                            <input
-                              type="text"
-                              name="policyId"
-                              placeholder="Policy ID"
-                              value={formData.policyId}
-                              onChange={handleChange}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <p>DAYS</p>
-                            <input
-                              type="number"
-                              name="policyDays"
-                              placeholder="Policy Days"
-                              value={formData.policyDays}
-                              onChange={handleChange}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <p>POLICY EXPIRES ON</p>
-                            <input
-                              type="date"
-                              name="policyDate"
-                              placeholder="Policy Date"
-                              value={formData.policyDate}
-                              onChange={handleChange}
-                              required
-                            />
-                          </div>
+                        <div>
+                          <p>DAYS</p>
+                          <input
+                            type="number"
+                            name="policyDays"
+                            placeholder="Policy Days"
+                            value={formData.policyDays}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <p>POLICY EXPIRES ON</p>
+                          <input
+                            type="date"
+                            name="policyDate"
+                            placeholder="Policy Date"
+                            value={formData.policyDate}
+                            onChange={handleChange}
+                            required
+                          />
                         </div>
                       </div>
+                    </div>
 
-                      <div className="showSecondPartContainer">
-                        <input
-                          type="checkbox"
-                          name="showSecondPart"
-                          checked={formData.showSecondPart}
-                          onChange={handleChange}
-                        />
-                        <p>Show Second Part</p>
-                      </div>
+                    <div className="showSecondPartContainer">
+                      <input
+                        type="checkbox"
+                        name="showSecondPart"
+                        checked={formData.showSecondPart}
+                        onChange={handleChange}
+                      />
+                      <p>Show Second Part</p>
+                    </div>
 
+                    {formData.showSecondPart && (
+                      <>
+                        <p className="star">
+                          ********************************************************
+                        </p>
+                        <p className="did_we_nail_it">DID WE NAIL IT?</p>
+                      </>
+                    )}
+
+                    <div className="footer">
                       {formData.showSecondPart && (
                         <>
-                          <p className="star">
-                            ********************************************************
+                          <p>
+                            Take a short survey for a chance TO WIN A $5,000
+                            HOME DEPOT GIFT CARD
                           </p>
-                          <p className="did_we_nail_it">DID WE NAIL IT?</p>
-                        </>
-                      )}
-
-                      <div className="footer">
-                        {formData.showSecondPart && (
-                          <>
-                            <p>
-                              Take a short survey for a chance TO WIN A $5,000
-                              HOME DEPOT GIFT CARD
-                            </p>
-                            <div className="middle">
-                              <p>Opine en español</p>
-                              <p className="link">wwww.homedepot.com/survey</p>
-                              <div>
-                                <div
-                                  style={{
-                                    display: "grid",
-                                    gap: "4px",
-                                    gridTemplateColumns: "auto 1fr",
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  <span>User ID:</span>{" "}
-                                  <input
-                                    type="text"
-                                    name="userId"
-                                    placeholder="User ID"
-                                    value={formData.userId}
-                                    onChange={handleChange}
-                                  />
-                                  {errors.userId && (
-                                    <p style={{ color: "red" }}>
-                                      {errors.userId}
-                                    </p>
-                                  )}
-                                </div>
-                                <div
-                                  style={{
-                                    display: "grid",
-                                    gap: "4px",
-                                    gridTemplateColumns: "auto 1fr",
-                                    alignItems: "center",
-                                    marginTop: "4px",
-                                  }}
-                                >
-                                  <span>PASSWORD:</span>{" "}
-                                  <input
-                                    type="password"
-                                    name="userPassword"
-                                    placeholder="User Password"
-                                    value={formData.userPassword}
-                                    onChange={handleChange}
-                                  />
-                                  {errors.userPassword && (
-                                    <p style={{ color: "red" }}>
-                                      {errors.userPassword}
-                                    </p>
-                                  )}
-                                </div>
+                          <div className="middle">
+                            <p>Opine en español</p>
+                            <p className="link">wwww.homedepot.com/survey</p>
+                            <div>
+                              <div
+                                style={{
+                                  display: "grid",
+                                  gap: "4px",
+                                  gridTemplateColumns: "auto 1fr",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <span>User ID:</span>{" "}
+                                <input
+                                  type="text"
+                                  name="userId"
+                                  placeholder="User ID"
+                                  value={formData.userId}
+                                  onChange={handleChange}
+                                />
+                                {errors.userId && (
+                                  <p style={{ color: "red" }}>
+                                    {errors.userId}
+                                  </p>
+                                )}
+                              </div>
+                              <div
+                                style={{
+                                  display: "grid",
+                                  gap: "4px",
+                                  gridTemplateColumns: "auto 1fr",
+                                  alignItems: "center",
+                                  marginTop: "4px",
+                                }}
+                              >
+                                <span>PASSWORD:</span>{" "}
+                                <input
+                                  type="password"
+                                  name="userPassword"
+                                  placeholder="User Password"
+                                  value={formData.userPassword}
+                                  onChange={handleChange}
+                                />
+                                {errors.userPassword && (
+                                  <p style={{ color: "red" }}>
+                                    {errors.userPassword}
+                                  </p>
+                                )}
                               </div>
                             </div>
-                            <p>
-                              Entries must be completed within 14 days Of
-                              purchase. Entrants must be 18 or Older to enter.
-                              See the complete rules on website. No purchase
-                              necessary.
-                            </p>
-                          </>
-                        )}
-                        <button
-                          type="submit"
-                          style={{
-                            width: "100px",
-                            height: "30px",
-                            marginTop: "10px",
-                          }}
-                        >
-                          Submit
-                        </button>
-                      </div>
+                          </div>
+                          <p>
+                            Entries must be completed within 14 days Of
+                            purchase. Entrants must be 18 or Older to enter. See
+                            the complete rules on website. No purchase
+                            necessary.
+                          </p>
+                        </>
+                      )}
+                      <button
+                        type="submit"
+                        style={{
+                          width: "100px",
+                          height: "30px",
+                          marginTop: "10px",
+                        }}
+                      >
+                        Submit
+                      </button>
                     </div>
-                  </form>
-                  {!show && (
-                    <Receipt
-                      formData={formData}
-                      time12={time12}
-                      ampm={ampm}
-                      formatDate={formatDate}
-                      formatDateWithFullYear={formatDateWithFullYear}
-                      calculateSubtotal={calculateSubtotal}
-                      getTotal={getTotal}
-                      getChargeDue={getChargeDue}
-                      containerClass={`container1 ${!isAuthenticated ? "blurred" : ""}`}
-                    />
-                  )}
-                  {/* {show && (
+                  </div>
+                </form>
+                {!show && (
+                  <Receipt
+                    formData={formData}
+                    time12={time12}
+                    ampm={ampm}
+                    formatDate={formatDate}
+                    formatDateWithFullYear={formatDateWithFullYear}
+                    calculateSubtotal={calculateSubtotal}
+                    getTotal={getTotal}
+                    getChargeDue={getChargeDue}
+                    containerClass={`container1 ${
+                      !isAuthenticated ? "blurred" : ""
+                    }`}
+                  />
+                )}
+                {/* {show && (
                     <Receipt
                       formData={formData}
                       time12={time12}
@@ -830,20 +943,20 @@ function App() {
                       containerClass="container"
                     />
                   )} */}
-                </>
-              ) : (
-                <Receipt
-                  formData={formData}
-                  time12={time12}
-                  ampm={ampm}
-                  formatDate={formatDate}
-                  formatDateWithFullYear={formatDateWithFullYear}
-                  calculateSubtotal={calculateSubtotal}
-                  getTotal={getTotal}
-                  getChargeDue={getChargeDue}
-                  containerClass="container"
-                />
-              )
+              </>
+            ) : (
+              <Receipt
+                formData={formData}
+                time12={time12}
+                ampm={ampm}
+                formatDate={formatDate}
+                formatDateWithFullYear={formatDateWithFullYear}
+                calculateSubtotal={calculateSubtotal}
+                getTotal={getTotal}
+                getChargeDue={getChargeDue}
+                containerClass="container"
+              />
+            )
           }
         />
         <Route
@@ -860,10 +973,10 @@ function App() {
             </div>
           }
         />
-                <Route
+        <Route
           path="/admin"
           element={
-            isAuthenticated && userRole === 'admin' ? (
+            isAuthenticated && userRole === "admin" ? (
               <AdminPage /> // Only allow access if the user is authenticated and has the admin role
             ) : (
               <LoginPage
@@ -874,25 +987,34 @@ function App() {
           }
         />
         <Route
-        path="/receipt"
-        element={
-          isAuthenticated ? (
-            <ReceiptPage />
-          ) : (
-            <LoginPage
-              setIsAuthenticated={setIsAuthenticated}
-              setUserRole={setUserRole}
-            />
-          )
-        }
-      />
-              <Route
+          path="/receipt"
+          element={
+            isAuthenticated ? (
+              <ReceiptPage />
+            ) : (
+              <LoginPage
+                setIsAuthenticated={setIsAuthenticated}
+                setUserRole={setUserRole}
+              />
+            )
+          }
+        />
+        <Route
           path="/history"
-          element={isAuthenticated ? <HistoryPage /> : <LoginPage setIsAuthenticated={setIsAuthenticated} setUserRole={setUserRole} />}
+          element={
+            isAuthenticated ? (
+              <HistoryPage />
+            ) : (
+              <LoginPage
+                setIsAuthenticated={setIsAuthenticated}
+                setUserRole={setUserRole}
+              />
+            )
+          }
         />
       </Routes>
       <ToastContainer />
-      </>
+    </>
   );
 }
 
@@ -1210,6 +1332,32 @@ margin: 32px 0 16px;
   text-align: center; /* Centers the barcode within the div */
   width: auto; /* Allow the barcode to maintain its natural width */
 }
+
+.suggestion-list {
+  position: absolute;
+  z-index: 1000; /* Ensure it's on top */
+  background: white;
+  border: 1px solid #ccc;
+  width: 100%; /* Match the input field width */
+  max-height: 150px;
+  overflow-y: auto; /* Scroll if there are too many items */
+  list-style-type: none;
+  padding: 0;
+  margin: 0; /* Remove any default margin */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Add a shadow for visibility */
+  top: 100%; /* Position dropdown below the input */
+  left: 0; /* Align dropdown with the left edge of the input */
+}
+
+.suggestion-list li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.suggestion-list li:hover {
+  background-color: #f0f0f0;
+}
+
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -1478,12 +1626,16 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
-import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import { useMediaQuery, useTheme } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import TelegramIcon from "@mui/icons-material/Telegram";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import EmailIcon from "@mui/icons-material/Email";
-import AnnouncementIcon from "@mui/icons-material/Announcement";
 
 function Navbar({
   isAuthenticated,
@@ -1493,6 +1645,10 @@ function Navbar({
 }) {
   const navigate = useNavigate();
   const [showContact, setShowContact] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleLogout = () => {
     localStorage.removeItem("token"); // Remove token from localStorage
@@ -1501,9 +1657,78 @@ function Navbar({
     navigate("/login");
   };
 
+  const toggleDrawer = (open) => (event) => {
+    if (
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+    setDrawerOpen(open);
+  };
+
+  const menuItems = (
+    <List>
+      <ListItem button onClick={() => navigate("/generate")}>
+        <ListItemText primary="Generate" />
+      </ListItem>
+      {userRole === "admin" && (
+        <ListItem button onClick={() => navigate("/admin")}>
+          <ListItemText primary="Admin" />
+        </ListItem>
+      )}
+      <ListItem button onClick={() => navigate("/history")}>
+        <ListItemText primary="History" />
+      </ListItem>
+      <ListItem button onClick={handleLogout}>
+        <ListItemText primary="Logout" />
+      </ListItem>
+      <ListItem button>
+        <ListItemText primary="Contact" />
+      </ListItem>
+    </List>
+  );
+
   return (
-    <AppBar position="static">
-      <Toolbar>
+<AppBar position="static">
+  <Toolbar>
+    {isMobile ? (
+      <>
+        <IconButton
+          size="large"
+          edge="start"
+          color="inherit"
+          aria-label="menu"
+          onClick={toggleDrawer(true)}
+        >
+          <MenuIcon />
+        </IconButton>
+        <Drawer
+          anchor="left"
+          open={drawerOpen}
+          onClose={toggleDrawer(false)}
+        >
+          {menuItems}
+        </Drawer>
+        {/* Typography for mobile */}
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{
+            flexGrow: 1,
+            textAlign: "center", // Center it for mobile
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+          onClick={() => navigate("/")}
+          style={{ cursor: "pointer" }}
+        >
+          Receipt Generator
+        </Typography>
+      </>
+    ) : (
+      <>
         <IconButton
           size="large"
           edge="start"
@@ -1516,12 +1741,20 @@ function Navbar({
         <Typography
           variant="h6"
           component="div"
-          sx={{ flexGrow: 1 }}
+          sx={{
+            flexGrow: 1,
+            textAlign: "left", // Align left for desktop
+            minWidth: "auto", 
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
           onClick={() => navigate("/")}
           style={{ cursor: "pointer" }}
         >
           Receipt Generator
         </Typography>
+
         {isAuthenticated ? (
           <>
             <Button color="inherit" onClick={() => navigate("/generate")}>
@@ -1579,13 +1812,6 @@ function Navbar({
                   >
                     Mail
                   </Button>
-                  {/* <Button
-                    startIcon={<AnnouncementIcon />}
-                    href="#" // Replace with your news link
-                    sx={{ justifyContent: "flex-start" }}
-                  >
-                    News
-                  </Button> */}
                 </Box>
               )}
             </Box>
@@ -1598,68 +1824,16 @@ function Navbar({
             <Button color="inherit" onClick={() => navigate("/login")}>
               Login
             </Button>
-            <Box
-              sx={{ position: "relative" }}
-              onMouseEnter={() => setShowContact(true)}
-              onMouseLeave={() => setShowContact(false)}
-            >
-              <Button color="inherit">Contact</Button>
-              {showContact && (
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: "100%",
-                    left: 0,
-                    display: "flex",
-                    flexDirection: "column",
-                    bgcolor: "background.paper",
-                    p: 1,
-                    borderRadius: 1,
-                    boxShadow: 3,
-                  }}
-                >
-                  <Button
-                    startIcon={<TelegramIcon />}
-                    href="https://t.me/IDTemaplate"
-                    target="_blank"
-                    sx={{ justifyContent: "flex-start" }}
-                  >
-                    Telegram
-                  </Button>
-                  <Button
-                    startIcon={<WhatsAppIcon />}
-                    href="https://wa.me/+13473435837"
-                    target="_blank"
-                    sx={{ justifyContent: "flex-start" }}
-                  >
-                    WhatsApp
-                  </Button>
-                  <Button
-                    startIcon={<EmailIcon />}
-                    href="mailto:idtemplate.psd@gmail.com"
-                    target="_blank"
-                    sx={{ justifyContent: "flex-start" }}
-                  >
-                    Mail
-                  </Button>
-                  {/* <Button
-                    startIcon={<AnnouncementIcon />}
-                    href="#" // Replace with your news link
-                    sx={{ justifyContent: "flex-start" }}
-                  >
-                    News
-                  </Button> */}
-                </Box>
-              )}
-            </Box>
             <Button color="inherit" onClick={() => navigate("/generate")}>
               Generate
             </Button>
-            
           </>
         )}
-      </Toolbar>
-    </AppBar>
+      </>
+    )}
+  </Toolbar>
+</AppBar>
+
   );
 }
 
@@ -1721,6 +1895,8 @@ const Receipt = ({
   }, [formData.barcode, barcodeImage]);
 
   useEffect(() => {
+    const isReceiptSubmitted = sessionStorage.getItem("receiptSubmitted");
+
     const saveReceiptAsPngAutomatically = async () => {
       // Wait for the barcode to render
       await new Promise((resolve) => {
@@ -1754,8 +1930,9 @@ const Receipt = ({
       }
     };
   
-    if (formData && isReceiptPage) {
+    if (formData && isReceiptPage && isReceiptSubmitted) {
       saveReceiptAsPngAutomatically();
+      sessionStorage.removeItem("receiptSubmitted");
     }
   }, [formData, isReceiptPage]);
   
